@@ -91,10 +91,14 @@
   /* Data sources */
   .sources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .source-card { border: 1px solid #e8e8e8; border-radius: 12px; padding: 18px 20px; }
+  .source-card { cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+  .source-card:hover { border-color: #0f0f0f; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
   .source-name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-  .source-url { font-size: 11px; color: #6080d0; margin-bottom: 8px; word-break: break-all; }
+  .source-url { font-size: 11px; color: #6080d0; margin-bottom: 8px; word-break: break-all; text-decoration: none; display: block; }
+  .source-url:hover { text-decoration: underline; }
   .source-desc { font-size: 11px; color: #888; line-height: 1.6; }
-  .source-action { display: inline-block; font-size: 10px; font-weight: 600; background: #0f0f0f; color: #fff; padding: 4px 10px; border-radius: 6px; margin-top: 8px; }
+  .source-action { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; background: #0f0f0f; color: #fff; padding: 4px 10px; border-radius: 6px; margin-top: 8px; text-decoration: none; }
+  .source-action:hover { background: #333; }
 
   /* Approach */
   .approach-steps { display: flex; flex-direction: column; gap: 12px; }
@@ -380,27 +384,27 @@
       <div class="sources-grid">
         <div class="source-card">
           <div class="source-name">富田林市公式 製造企業情報</div>
-          <div class="source-url">city.tondabayashi.lg.jp/soshiki/36/1385.html</div>
+          <a class="source-url" href="https://www.city.tondabayashi.lg.jp/soshiki/36/1385.html" target="_blank" rel="noopener">city.tondabayashi.lg.jp/soshiki/36/1385.html ↗</a>
           <div class="source-desc">市内製造業99社が業種・住所・事業内容付きで掲載。無料で全件確認できる。まず全件チェックして食品・木工・梱包を絞り込む。</div>
-          <span class="source-action">最初に全件確認</span>
+          <a class="source-action" href="https://www.city.tondabayashi.lg.jp/soshiki/36/1385.html" target="_blank" rel="noopener">開く ↗</a>
         </div>
         <div class="source-card">
           <div class="source-name">富田林商工会</div>
-          <div class="source-url">tonshow.or.jp</div>
+          <a class="source-url" href="https://www.tonshow.or.jp/" target="_blank" rel="noopener">tonshow.or.jp ↗</a>
           <div class="source-desc">入会（年数千円〜）すると会員企業と直接繋がれる。異業種交流会への参加で経営者に直接アプローチできる。地元での最速ネットワーク構築手段。</div>
-          <span class="source-action">即入会を検討</span>
+          <a class="source-action" href="https://www.tonshow.or.jp/enrollment/" target="_blank" rel="noopener">入会案内を見る ↗</a>
         </div>
         <div class="source-card">
           <div class="source-name">アラームボックス（羽曳野市 食料品製造業）</div>
-          <div class="source-url">alarmbox.jp/companyinfo/osaka/city1141/middle-industries9</div>
+          <a class="source-url" href="https://alarmbox.jp/companyinfo/osaka/city1141/middle-industries9" target="_blank" rel="noopener">alarmbox.jp/companyinfo/osaka/city1141/middle-industries9 ↗</a>
           <div class="source-desc">羽曳野市の食料品製造業企業リストが無料で閲覧可能。会社名・所在地・従業員数まで確認できる。</div>
-          <span class="source-action">リスト抽出に使う</span>
+          <a class="source-action" href="https://alarmbox.jp/companyinfo/osaka/city1141/middle-industries9" target="_blank" rel="noopener">開く ↗</a>
         </div>
         <div class="source-card">
           <div class="source-name">イプロスものづくり（河内長野・富田林）</div>
-          <div class="source-url">ipros.jp/ranking/company/area/city/27214/</div>
+          <a class="source-url" href="https://www.ipros.jp/ranking/company/area/city/27214/" target="_blank" rel="noopener">ipros.jp/ranking/company/area/city/27214/ ↗</a>
           <div class="source-desc">ものづくり系企業のBtoBデータベース。エリア・業種で絞り込み可。問い合わせフォームから直接営業アプローチも可能。</div>
-          <span class="source-action">業種絞り込みに使う</span>
+          <a class="source-action" href="https://www.ipros.jp/ranking/company/area/city/27214/" target="_blank" rel="noopener">開く ↗</a>
         </div>
       </div>
     </div>
