@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIクリエイティブスタジオ — ビジネスモデル戦略</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #f4f4f2;
+    color: #1a1a1a;
+  }
+
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #fff;
+  }
+
+  /* Header */
+  .header {
+    background: #0f0f0f;
+    color: #fff;
+    padding: 52px 64px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 12px;
+  }
+  .header h1 em { font-style: normal; color: #555; font-weight: 300; }
+  .header-sub {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.7;
+    max-width: 520px;
+  }
+
+  /* Body */
+  .body { padding: 0 64px 72px; }
+
+  /* Section */
+  .section { padding-top: 52px; }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #ececec;
+  }
+  .section-no {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #ccc;
+    text-transform: uppercase;
+  }
+  .section-title {
+    font-size: 19px;
+    font-weight: 700;
+  }
+
+  /* Automation table */
+  .auto-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .auto-row {
+    display: grid;
+    grid-template-columns: 160px 80px 1fr 1fr;
+    gap: 0;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .auto-row.highlight { border-color: #0f0f0f; }
+
+  .ar-service {
+    padding: 18px 20px;
+    background: #fafafa;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-right: 1px solid #ececec;
+  }
+  .auto-row.highlight .ar-service { background: #0f0f0f; }
+
+  .ar-name {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .auto-row.highlight .ar-name { color: #fff; }
+
+  .ar-price { font-size: 11px; color: #aaa; }
+  .auto-row.highlight .ar-price { color: #555; }
+
+  .ar-rate {
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-right: 1px solid #ececec;
+    gap: 6px;
+  }
+
+  .rate-num {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .rate-bar-wrap {
+    width: 36px;
+    height: 4px;
+    background: #ececec;
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .rate-bar {
+    height: 100%;
+    background: #0f0f0f;
+    border-radius: 100px;
+  }
+
+  .ar-claude {
+    padding: 18px 20px;
+    border-right: 1px solid #ececec;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .ar-human {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .ar-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #bbb;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .ar-items { list-style: none; }
+  .ar-item {
+    font-size: 11px;
+    color: #666;
+    padding: 2px 0;
+    padding-left: 12px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .ar-item::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: #ddd;
+    font-size: 9px;
+  }
+
+  /* Conclusion callout */
+  .callout {
+    background: #f4f4f2;
+    border-left: 3px solid #0f0f0f;
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    font-size: 13px;
+    color: #444;
+    line-height: 1.7;
+    margin-top: 20px;
+  }
+  .callout strong { color: #0f0f0f; font-weight: 700; }
+
+  /* Bottleneck grid */
+  .bn-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .bn-card {
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+
+  .bn-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bn-icon {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #fff0f0;
+    color: #cc3333;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .bn-desc { font-size: 12px; color: #888; line-height: 1.6; }
+
+  /* Simulation */
+  .sim-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .sim-card {
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .sim-head {
+    padding: 14px 20px;
+    background: #f4f4f2;
+    font-size: 11px;
+    font-weight: 700;
+    color: #888;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e8e8e8;
+  }
+
+  .sim-body { padding: 18px 20px; }
+
+  .sim-formula {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+
+  .sim-formula span {
+    display: block;
+    color: #999;
+    font-size: 12px;
+  }
+
+  .sim-result {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f0f0f;
+  }
+
+  .sim-result small {
+    font-size: 12px;
+    font-weight: 400;
+    color: #aaa;
+    margin-left: 4px;
+  }
+
+  .sim-note { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+  .sim-card.good .sim-head { background: #0f0f0f; color: #555; border-bottom-color: #222; }
+  .sim-card.good .sim-result { color: #0f0f0f; }
+
+  /* Two-pillar */
+  .pillars {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .pillar {
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .pillar-head {
+    padding: 20px 24px 16px;
+  }
+
+  .pillar.a .pillar-head { background: #0f0f0f; }
+  .pillar.b .pillar-head { background: #f4f4f2; }
+
+  .pillar-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .pillar.a .pillar-label { color: #444; }
+  .pillar.b .pillar-label { color: #bbb; }
+
+  .pillar-name {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+
+  .pillar.a .pillar-name { color: #fff; }
+  .pillar.b .pillar-name { color: #0f0f0f; }
+
+  .pillar-revenue {
+    font-size: 13px;
+    margin-top: 8px;
+    font-weight: 600;
+  }
+
+  .pillar.a .pillar-revenue { color: #666; }
+  .pillar.b .pillar-revenue { color: #888; }
+
+  .pillar-body {
+    padding: 16px 24px 20px;
+    border: 1px solid #e8e8e8;
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .pillar-items { list-style: none; }
+  .pillar-item {
+    font-size: 12px;
+    color: #666;
+    padding: 5px 0;
+    padding-left: 14px;
+    position: relative;
+    border-bottom: 1px dashed #f4f4f2;
+    line-height: 1.5;
+  }
+  .pillar-item:last-child { border-bottom: none; }
+  .pillar-item::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #ccc;
+    font-size: 10px;
+    top: 6px;
+  }
+
+  /* SNS Package */
+  .pkg-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid #e8e8e8;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .pkg-col {
+    padding: 24px 22px;
+    border-right: 1px solid #ececec;
+  }
+  .pkg-col:last-child { border-right: none; }
+
+  .pkg-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #bbb;
+    margin-bottom: 12px;
+  }
+
+  .pkg-value {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .pkg-sub { font-size: 11px; color: #999; line-height: 1.6; }
+
+  /* Flow of work */
+  .flow-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .flow-actor {
+    width: 100px;
+    flex-shrink: 0;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .flow-actor.claude { background: #0f0f0f; color: #fff; }
+  .flow-actor.human { background: #f4f4f2; color: #0f0f0f; }
+
+  .flow-tasks {
+    flex: 1;
+    padding: 14px 20px;
+    border-left: 1px solid #ececec;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .flow-tag {
+    font-size: 11px;
+    background: #f4f4f2;
+    color: #555;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .flow-tag.primary {
+    background: #0f0f0f;
+    color: #fff;
+  }
+
+  .flow-pct {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f0f0f;
+    flex-shrink: 0;
+    padding-left: 16px;
+  }
+
+  /* Verdict */
+  .verdict {
+    background: #0f0f0f;
+    color: #fff;
+    border-radius: 16px;
+    padding: 36px 40px;
+    margin-top: 52px;
+  }
+
+  .verdict-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .verdict-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    line-height: 1.4;
+  }
+
+  .verdict-steps {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+  }
+
+  .vs {
+    flex: 1;
+    padding: 16px 20px;
+    border: 1px solid #222;
+    border-right: none;
+    position: relative;
+  }
+  .vs:first-child { border-radius: 10px 0 0 10px; }
+  .vs:last-child { border-right: 1px solid #222; border-radius: 0 10px 10px 0; }
+
+  .vs-month { font-size: 10px; color: #555; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .vs-action { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .vs-note { font-size: 11px; color: #666; line-height: 1.5; }
+
+  .vs-arrow {
+    display: flex;
+    align-items: center;
+    color: #333;
+    font-size: 18px;
+    padding: 0 4px;
+    flex-shrink: 0;
+  }
+
+  .verdict-note { font-size: 12px; color: #555; line-height: 1.8; }
+
+  /* Footer */
+  .footer {
+    padding: 24px 64px;
+    border-top: 1px solid #ececec;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-brand { font-size: 12px; font-weight: 700; }
+  .footer-date { font-size: 11px; color: #ccc; }
+
+  @media print {
+    body { background: #fff; }
+    .page { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">Business Strategy</div>
+    <h1>Claude自動化 ×<br><em>薄利多売モデルの検討</em></h1>
+    <p class="header-sub">
+      「Claudeで作業を自動化して単価を下げ、数を売る」戦略の<br>
+      実現可能性・ボトルネック・最適な使い分けを整理する。
+    </p>
+  </div>
+
+  <div class="body">
+
+    <!-- 01. 自動化できる量 -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-no">01</span>
+        <span class="section-title">サービス別 自動化できる量</span>
+      </div>
+
+      <div class="auto-grid">
+
+        <!-- SNS -->
+        <div class="auto-row highlight">
+          <div class="ar-service">
+            <div class="ar-name">SNS運用代行</div>
+            <div class="ar-price">40〜80万/月</div>
+          </div>
+          <div class="ar-rate">
+            <div class="rate-num" style="color:#fff;">75%</div>
+            <div class="rate-bar-wrap"><div class="rate-bar" style="width:75%; background:#fff;"></div></div>
+          </div>
+          <div class="ar-claude">
+            <div class="ar-label" style="color:#555;">Claudeができる</div>
+            <ul class="ar-items">
+              <li class="ar-item" style="color:#aaa;">投稿文・キャプション生成</li>
+              <li class="ar-item" style="color:#aaa;">画像プロンプト作成</li>
+              <li class="ar-item" style="color:#aaa;">月次レポート自動生成</li>
+              <li class="ar-item" style="color:#aaa;">コンテンツカレンダー設計</li>
+            </ul>
+          </div>
+          <div class="ar-human">
+            <div class="ar-label" style="color:#555;">人間が残る作業</div>
+            <ul class="ar-items">
+              <li class="ar-item" style="color:#aaa;">戦略判断・方向修正</li>
+              <li class="ar-item" style="color:#aaa;">クライアント対応</li>
+              <li class="ar-item" style="color:#aaa;">品質確認・最終承認</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- コンサル -->
+        <div class="auto-row highlight">
+          <div class="ar-service">
+            <div class="ar-name">企画コンサル</div>
+            <div class="ar-price">50〜100万</div>
+          </div>
+          <div class="ar-rate">
+            <div class="rate-num" style="color:#fff;">65%</div>
+            <div class="rate-bar-wrap"><div class="rate-bar" style="width:65%; background:#fff;"></div></div>
+          </div>
+          <div class="ar-claude">
+            <div class="ar-label" style="color:#555;">Claudeができる</div>
+            <ul class="ar-items">
+              <li class="ar-item" style="color:#aaa;">競合・市場調査レポート</li>
+              <li class="ar-item" style="color:#aaa;">戦略書・企画書の初稿</li>
+              <li class="ar-item" style="color:#aaa;">コンテンツカレンダー</li>
+            </ul>
+          </div>
+          <div class="ar-human">
+            <div class="ar-label" style="color:#555;">人間が残る作業</div>
+            <ul class="ar-items">
+              <li class="ar-item" style="color:#aaa;">ヒアリング・課題特定</li>
+              <li class="ar-item" style="color:#aaa;">プレゼン・説明</li>
+              <li class="ar-item" style="color:#aaa;">修正・合意形成</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 開発 -->
+        <div class="auto-row">
+          <div class="ar-service">
+            <div class="ar-name">AIツール開発</div>
+            <div class="ar-price">300〜500万</div>
+          </div>
+          <div class="ar-rate">
+            <div class="rate-num">40%</div>
+            <div class="rate-bar-wrap"><div class="rate-bar" style="width:40%;"></div></div>
+          </div>
+          <div class="ar-claude">
+            <div class="ar-label">Claudeができる</div>
+            <ul class="ar-items">
+              <li class="ar-item">コード生成・設計書</li>
+              <li class="ar-item">ドキュメント作成</li>
+              <li class="ar-item">テストコード生成</li>
+            </ul>
+          </div>
+          <div class="ar-human">
+            <div class="ar-label">人間が残る作業</div>
+            <ul class="ar-items">
+              <li class="ar-item">要件定義・ヒアリング</li>
+              <li class="ar-item">テスト・デバッグ</li>
+              <li class="ar-item">デプロイ・導入支援</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 動画 -->
+        <div class="auto-row">
+          <div class="ar-service">
+            <div class="ar-name">AI動画制作</div>
+            <div class="ar-price">150〜250万</div>
+          </div>
+          <div class="ar-rate">
+            <div class="rate-num">35%</div>
+            <div class="rate-bar-wrap"><div class="rate-bar" style="width:35%;"></div></div>
+          </div>
+          <div class="ar-claude">
+            <div class="ar-label">Claudeができる</div>
+            <ul class="ar-items">
+              <li class="ar-item">企画書・脚本生成</li>
+              <li class="ar-item">絵コンテ・構成案</li>
+              <li class="ar-item">ナレーション原稿</li>
+            </ul>
+          </div>
+          <div class="ar-human">
+            <div class="ar-label">人間が残る作業</div>
+            <ul class="ar-items">
+              <li class="ar-item">撮影・カメラワーク</li>
+              <li class="ar-item">編集・カラグレ</li>
+              <li class="ar-item">Runway/AI映像操作</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="callout">
+        <strong>結論:</strong> 自動化で単価を下げて数が取れるのは <strong>SNS運用と企画コンサルのみ。</strong><br>
+        動画制作・AI開発は人手が50〜60%残るため、薄利多売モデルには向かない。
+      </div>
+    </div>
+
+    <!-- 02. 数を売るモデルの現実 -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-no">02</span>
+        <span class="section-title">数を売るモデルの現実</span>
+      </div>
+
+      <div class="sim-wrap">
+        <div class="sim-card">
+          <div class="sim-head">現行モデル</div>
+          <div class="sim-body">
+            <div class="sim-formula">
+              SNS運用 60万/月 × 3社
+              <span>= 月180万の継続収益</span>
+            </div>
+            <div class="sim-result">180万<small>/月</small></div>
+            <div class="sim-note">管理負荷: 低（3社なら余裕）</div>
+          </div>
+        </div>
+        <div class="sim-card">
+          <div class="sim-head">自動化・薄利多売モデル</div>
+          <div class="sim-body">
+            <div class="sim-formula">
+              SNS運用 20万/月 × 30社
+              <span>= 月600万の継続収益</span>
+            </div>
+            <div class="sim-result">600万<small>/月</small></div>
+            <div class="sim-note">管理負荷: 高（30社の対応は2人で重い）</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bn-grid">
+        <div class="bn-card">
+          <div class="bn-title">
+            <div class="bn-icon">!</div>
+            営業コスト
+          </div>
+          <div class="bn-desc">30社集めるには200〜300件のアプローチが必要。Claudeは自動化できるが営業活動は自動化できない。</div>
+        </div>
+        <div class="bn-card">
+          <div class="bn-title">
+            <div class="bn-icon">!</div>
+            顧客管理の負荷
+          </div>
+          <div class="bn-desc">30社のSlack・連絡・修正対応・月次報告を2人で回すのは限界に近い。</div>
+        </div>
+        <div class="bn-card">
+          <div class="bn-title">
+            <div class="bn-icon">!</div>
+            解約リスク
+          </div>
+          <div class="bn-desc">月20万のサービスはちょっとした不満や予算削減で切られやすい。高単価より解約率が高い傾向。</div>
+        </div>
+        <div class="bn-card">
+          <div class="bn-title">
+            <div class="bn-icon">!</div>
+            価格競争
+          </div>
+          <div class="bn-desc">「月20万でSNS運用」は競合が多い。Claude活用は他社も追いつく。差別化が難しくなる。</div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>本当のボトルネックはClaudeではなく「集客・営業・顧客管理」。</strong><br>
+        自動化しても30社の管理コストは2人で重く、薄利では利益が消えるリスクがある。
+      </div>
+    </div>
+
+    <!-- 03. 最適な使い分け -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-no">03</span>
+        <span class="section-title">最適な使い分け：2本柱モデル</span>
+      </div>
+
+      <div class="pillars">
+        <div class="pillar a">
+          <div class="pillar-head">
+            <div class="pillar-label">Pillar A ／ 高単価・少数</div>
+            <div class="pillar-name">AIツール開発<br>＋ AI動画制作</div>
+            <div class="pillar-revenue">目標: 月1,000〜1,200万</div>
+          </div>
+          <div class="pillar-body">
+            <ul class="pillar-items">
+              <li class="pillar-item">案件数: 月3〜5件</li>
+              <li class="pillar-item">単価: 150〜500万/件</li>
+              <li class="pillar-item">粗利率: 60〜70%</li>
+              <li class="pillar-item">ブランド・実績を積み上げる</li>
+              <li class="pillar-item">Claudeは補助（コード・企画書生成）</li>
+            </ul>
+          </div>
+        </div>
+        <div class="pillar b">
+          <div class="pillar-head">
+            <div class="pillar-label">Pillar B ／ 低単価・継続</div>
+            <div class="pillar-name">SNS運用<br>自動化パッケージ</div>
+            <div class="pillar-revenue">目標: 月300〜500万（20社規模）</div>
+          </div>
+          <div class="pillar-body">
+            <ul class="pillar-items">
+              <li class="pillar-item">月20万/社 × 20社</li>
+              <li class="pillar-item">Claudeが投稿文・レポートを自動生成</li>
+              <li class="pillar-item">1人が週10時間で20社管理できる</li>
+              <li class="pillar-item">キャッシュフローを安定させる役割</li>
+              <li class="pillar-item">3ヶ月目以降に並走開始</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>合計目標:</strong> PillarA（1,000〜1,200万）+ PillarB（300〜500万）= <strong>月1,300〜1,700万</strong><br>
+        高単価で利益を稼ぎ、低単価継続収益でキャッシュフローを安定させる構造。
+      </div>
+    </div>
+
+    <!-- 04. SNS自動化パッケージ詳細 -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-no">04</span>
+        <span class="section-title">SNS自動化パッケージ 設計</span>
+      </div>
+
+      <div class="pkg-grid">
+        <div class="pkg-col">
+          <div class="pkg-label">価格</div>
+          <div class="pkg-value">20万円/月</div>
+          <div class="pkg-sub">3ヶ月一括60万円<br>（解約防止）</div>
+        </div>
+        <div class="pkg-col">
+          <div class="pkg-label">ターゲット</div>
+          <div class="pkg-value">年商1〜5億<br>BtoC中小企業</div>
+          <div class="pkg-sub">マーケ専任がいない<br>採用・集客課題あり</div>
+        </div>
+        <div class="pkg-col">
+          <div class="pkg-label">内容</div>
+          <div class="pkg-value">月30投稿<br>＋月次レポート</div>
+          <div class="pkg-sub">Instagram / TikTok<br>/ X いずれか1〜2媒体</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 8px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #bbb; text-transform: uppercase; margin-bottom: 12px;">作業フロー（1社あたり月2〜3時間）</div>
+        <div class="flow-row">
+          <div class="flow-actor claude">Claude<br>自動</div>
+          <div class="flow-tasks">
+            <span class="flow-tag primary">投稿文30本生成</span>
+            <span class="flow-tag primary">画像プロンプト</span>
+            <span class="flow-tag primary">月次レポート</span>
+            <span class="flow-tag primary">戦略書更新</span>
+            <div class="flow-pct">75%</div>
+          </div>
+        </div>
+        <div class="flow-row">
+          <div class="flow-actor human">人間<br>確認</div>
+          <div class="flow-tasks">
+            <span class="flow-tag">品質チェック（30分）</span>
+            <span class="flow-tag">クライアント報告（30分）</span>
+            <span class="flow-tag">方向修正（1時間）</span>
+            <div class="flow-pct">25%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        1人が週10時間の稼働で <strong>20社を並行管理できる。</strong><br>
+        20社 × 20万 = <strong>月400万の安定収益</strong> が2ヶ月目から積み上がる。
+      </div>
+    </div>
+
+    <!-- Verdict -->
+    <div class="verdict">
+      <div class="verdict-label">Recommendation</div>
+      <div class="verdict-title">
+        まず高単価で実績と資金を作り、<br>3ヶ月目から自動化パッケージを並走させる。
+      </div>
+
+      <div class="verdict-steps">
+        <div class="vs">
+          <div class="vs-month">Month 1〜2</div>
+          <div class="vs-action">高単価案件で1,500万入金</div>
+          <div class="vs-note">AIツール開発・動画制作に集中。実績とポートフォリオを作る。</div>
+        </div>
+        <div class="vs-arrow">→</div>
+        <div class="vs">
+          <div class="vs-month">Month 3〜4</div>
+          <div class="vs-action">SNS自動パッケージ 10社獲得</div>
+          <div class="vs-note">月200万の継続収益が積み上がり始める。</div>
+        </div>
+        <div class="vs-arrow">→</div>
+        <div class="vs">
+          <div class="vs-month">Month 5〜6</div>
+          <div class="vs-action">20社規模に拡大</div>
+          <div class="vs-note">月400万の安定ベース＋高単価案件で月1,500万超を安定維持。</div>
+        </div>
+      </div>
+
+      <div class="verdict-note">
+        ⚠️ ゼロからいきなり「安く多く」を狙うのは NG。営業コスト・管理コストで利益が消える。<br>
+        高単価で利益を確保しながら、自動化パッケージを「第二の柱」として育てるのが最速。
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-brand">AI Creative Studio — Business Strategy</div>
+    <div class="footer-date">2026.06.03</div>
+  </div>
+
+</div>
+</body>
+</html>
