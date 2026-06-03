@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIクリエイティブスタジオ — サービスメニュー</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #f4f4f2;
+    color: #1a1a1a;
+  }
+
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #fff;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: #0f0f0f;
+    color: #fff;
+    padding: 52px 64px 44px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: 120px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+  .badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 14px;
+  }
+  .header h1 em { font-style: normal; color: #555; font-weight: 300; }
+  .tagline {
+    font-size: 13px;
+    color: #777;
+    line-height: 1.7;
+    max-width: 520px;
+  }
+  .header-chips {
+    display: flex;
+    gap: 8px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    font-size: 11px;
+    font-weight: 500;
+    color: #aaa;
+    border: 1px solid #333;
+    padding: 4px 12px;
+    border-radius: 100px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Body ── */
+  .body { padding: 56px 64px 64px; }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #bbb;
+    margin-bottom: 24px;
+  }
+
+  /* ── Service Block ── */
+  .service-block {
+    border: 1px solid #e8e8e8;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .service-block.primary { border-color: #0f0f0f; }
+
+  /* head row */
+  .sb-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 28px 32px 24px;
+    gap: 24px;
+    border-bottom: 1px solid #ececec;
+  }
+  .service-block.primary .sb-head {
+    background: #0f0f0f;
+    border-bottom-color: #222;
+  }
+
+  .sb-left { flex: 1; }
+  .sb-no {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #ccc;
+    margin-bottom: 8px;
+  }
+  .service-block.primary .sb-no { color: #444; }
+
+  .sb-name {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .service-block.primary .sb-name { color: #fff; }
+
+  .sb-tagline {
+    font-size: 12px;
+    color: #999;
+    line-height: 1.6;
+  }
+  .service-block.primary .sb-tagline { color: #666; }
+
+  .sb-price-box { text-align: right; flex-shrink: 0; }
+  .sb-price {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f0f0f;
+    white-space: nowrap;
+  }
+  .service-block.primary .sb-price { color: #fff; }
+  .sb-lead {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 4px;
+    text-align: right;
+  }
+
+  /* detail grid */
+  .sb-detail {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+
+  .sd-col {
+    padding: 22px 28px;
+    border-right: 1px solid #f0f0f0;
+  }
+  .sd-col:last-child { border-right: none; }
+
+  .sd-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #bbb;
+    margin-bottom: 12px;
+  }
+
+  .sd-items { list-style: none; }
+  .sd-item {
+    font-size: 12px;
+    color: #555;
+    padding: 4px 0;
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .sd-item::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: #ddd;
+    font-size: 10px;
+  }
+
+  .sd-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sd-tag {
+    font-size: 10px;
+    background: #f4f4f2;
+    color: #666;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  /* process row */
+  .sb-process {
+    padding: 18px 28px;
+    background: #fafaf9;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .proc-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #888;
+    white-space: nowrap;
+  }
+
+  .proc-dot {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #0f0f0f;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .proc-arrow {
+    color: #ccc;
+    font-size: 14px;
+    margin: 0 8px;
+    flex-shrink: 0;
+  }
+
+  /* ── Plans (S3) ── */
+  .plans {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+
+  .plan {
+    padding: 20px 24px;
+    border-right: 1px solid #f0f0f0;
+  }
+  .plan:last-child { border-right: none; }
+  .plan.recommended { background: #f4f4f2; }
+
+  .plan-name {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .plan-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f0f0f;
+    margin-bottom: 12px;
+  }
+
+  .plan-features { list-style: none; }
+  .plan-feature {
+    font-size: 11px;
+    color: #777;
+    padding: 3px 0;
+    padding-left: 12px;
+    position: relative;
+  }
+  .plan-feature::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #0f0f0f;
+    font-size: 9px;
+    font-weight: 700;
+  }
+
+  .rec-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    background: #0f0f0f;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 100px;
+    margin-left: 6px;
+    letter-spacing: 0.05em;
+    vertical-align: middle;
+  }
+
+  /* ── Cases ── */
+  .cases-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .case-card {
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .case-industry {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #bbb;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .case-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .case-result {
+    font-size: 11px;
+    color: #888;
+    line-height: 1.6;
+  }
+
+  .case-service {
+    display: inline-block;
+    font-size: 10px;
+    background: #f4f4f2;
+    color: #666;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-top: 10px;
+    font-weight: 500;
+  }
+
+  /* ── CTA ── */
+  .cta {
+    background: #0f0f0f;
+    color: #fff;
+    border-radius: 16px;
+    padding: 40px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+  }
+
+  .cta h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .cta p { font-size: 13px; color: #777; line-height: 1.7; }
+
+  .cta-right { flex-shrink: 0; text-align: right; }
+  .cta-email { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .cta-note { font-size: 11px; color: #555; }
+
+  /* ── Footer ── */
+  .footer {
+    padding: 24px 64px;
+    border-top: 1px solid #ececec;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-brand { font-size: 12px; font-weight: 700; }
+  .footer-date { font-size: 11px; color: #ccc; }
+
+  @media print {
+    body { background: #fff; }
+    .page { max-width: 100%; box-shadow: none; }
+    .service-block { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">Service Menu 2026</div>
+    <h1>AIクリエイティブスタジオ<br><em>映像 × 開発 × AIを一気通貫で。</em></h1>
+    <p class="tagline">
+      従来の制作会社は映像か開発のどちらかしかできない。<br>
+      私たちはその両方にAIを掛け合わせ、従来比2倍の速度・同等以下のコストで動きます。
+    </p>
+    <div class="header-chips">
+      <span class="chip">映像制作</span>
+      <span class="chip">AIツール開発</span>
+      <span class="chip">SNS運用</span>
+      <span class="chip">企画・コンサル</span>
+      <span class="chip">一気通貫</span>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+
+    <div class="section-label">Services</div>
+
+    <!-- S1: AIツール開発 -->
+    <div class="service-block primary">
+      <div class="sb-head">
+        <div class="sb-left">
+          <div class="sb-no">S-01 ／ AIツール開発</div>
+          <div class="sb-name">業務自動化 &amp; AIエージェント構築</div>
+          <div class="sb-tagline">社内の繰り返し作業をAIに任せ、人が本来やるべき仕事に集中できる環境を構築。<br>月数十万円の人件費削減を、数百万円の初期投資で実現。</div>
+        </div>
+        <div class="sb-price-box">
+          <div class="sb-price">300〜500万円</div>
+          <div class="sb-lead">納期 4〜6週間</div>
+        </div>
+      </div>
+
+      <div class="sb-detail">
+        <div class="sd-col">
+          <div class="sd-label">成果物</div>
+          <ul class="sd-items">
+            <li class="sd-item">社内FAQ・問い合わせ対応bot</li>
+            <li class="sd-item">見積もり・帳票自動生成ツール</li>
+            <li class="sd-item">データ集計・レポート自動化</li>
+            <li class="sd-item">採用スクリーニングAI</li>
+            <li class="sd-item">ナレッジ検索システム</li>
+          </ul>
+        </div>
+        <div class="sd-col">
+          <div class="sd-label">使用技術</div>
+          <div class="sd-tags">
+            <span class="sd-tag">Claude API</span>
+            <span class="sd-tag">OpenAI API</span>
+            <span class="sd-tag">Dify</span>
+            <span class="sd-tag">n8n / Make</span>
+            <span class="sd-tag">Slack / LINE連携</span>
+            <span class="sd-tag">Google Sheets</span>
+            <span class="sd-tag">Notion API</span>
+            <span class="sd-tag">Python</span>
+          </div>
+        </div>
+        <div class="sd-col">
+          <div class="sd-label">こんな課題に</div>
+          <ul class="sd-items">
+            <li class="sd-item">同じ質問への返答に時間を取られている</li>
+            <li class="sd-item">Excel作業・集計が毎週発生している</li>
+            <li class="sd-item">担当者しか知らない業務がある</li>
+            <li class="sd-item">人手不足だが採用コストをかけたくない</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sb-process">
+        <div class="proc-step"><div class="proc-dot">1</div>業務ヒアリング</div>
+        <div class="proc-arrow">→</div>
+        <div class="proc-step"><div class="proc-dot">2</div>要件定義・設計</div>
+        <div class="proc-arrow">→</div>
+        <div class="proc-step"><div class="proc-dot">3</div>プロトタイプ提出</div>
+        <div class="proc-arrow">→</div>
+        <div class="proc-step"><div class="proc-dot">4</div>フィードバック修正</div>
+        <div class="proc-arrow">→</div>
+        <div class="proc-step"><div class="proc-dot">5</div>本番導入・レクチャー</div>
+      </div>
+    </div>
+
+    <!-- S2: AI動画制作 -->
+    <div class="service-block">
+      <div class="sb-head">
+        <div class="sb-left">
+          <div class="sb-no">S-02 ／ AI動画制作</div>
+          <div class="sb-name">採用・ブランドフィルム・商品PR動画</div>
+          <div class="sb-tagline">AIツールと実撮影を組み合わせ、従来の制作会社より2〜3週間速く、30%安く高品質な映像を納品。<br>企画から編集・納品まで一社完結。</div>
+        </div>
+        <div class="sb-price-box">
+          <div class="sb-price">150〜250万円</div>
+          <div class="sb-lead">納期 2〜3週間</div>
+        </div>
+      </div>
+
+      <div class="sb-detail">
+        <div class="sd-col">
+          <div class="sd-label">制作できるもの</div>
+          <ul class="sd-items">
+            <li class="sd-item">採用ブランドフィルム（2〜4分）</li>
+            <li class="sd-item">会社紹介・コーポレート動画（2〜5分）</li>
+            <li class="sd-item">商品・サービス紹介（30秒〜2分）</li>
+            <li class="sd-item">SNS用縦型ショート（15〜60秒）× 複数本</li>
+            <li class="sd-item">イベント・展示会用映像</li>
+          </ul>
+        </div>
+        <div class="sd-col">
+          <div class="sd-label">使用技術・ツール</div>
+          <div class="sd-tags">
+            <span class="sd-tag">Runway Gen-3</span>
+            <span class="sd-tag">Sora</span>
+            <span class="sd-tag">HeyGen</span>
+            <span class="sd-tag">ElevenLabs</span>
+            <span class="sd-tag">Premiere Pro</span>
+            <span class="sd-tag">After Effects</span>
+            <span class="sd-tag">DaVinci Resolve</span>
+            <span class="sd-tag">実撮影対応</span>
+          </div>
+        </div>
+        <div class="sd-col">
+          <div class="sd-label">こんな課題に</div>
+          <ul class="sd-items">
+            <li class="sd-item">採用に動画が必要だが予算・時間がない</li>
+            <li class="sd-item">制作会社に頼むと2〜3ヶ月かかる</li>
+            <li class="sd-item">コンセプト映像で差別化したい</li>
+            <li class="sd-item">SNS用の動画を量産したい</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sb-process">
+        <div class="proc-step"><div class="proc-dot">1</div>企画・絵コンテ</div>
+        <div class="proc-arrow">→</div>
+        <div class="proc-step"><div class="proc-dot">2</div>撮影 or AI生成</div>
+        <div class="proc-arrow">→</div>
+        <div class="proc-step"><div class="proc-dot">3</div>粗編集・確認</div>
+        <div class="proc-arrow">→</div>
+        <div class="proc-step"><div class="proc-dot">4</div>本編集・音楽</div>
+        <div class="proc-arrow">→</div>
+        <div class="proc-step"><div class="proc-dot">5</div>修正・納品</div>
+      </div>
+    </div>
+
+    <!-- S3: SNS運用 -->
+    <div class="service-block">
+      <div class="sb-head">
+        <div class="sb-left">
+          <div class="sb-no">S-03 ／ SNS運用代行</div>
+          <div class="sb-name">AI × 戦略設計で成果を出すSNS運用</div>
+          <div class="sb-tagline">AIでコンテンツ制作を効率化しつつ、人間が戦略とブランドトーンを担保。<br>投稿するだけでなく「売上・採用・認知」につながるSNSを設計します。</div>
+        </div>
+        <div class="sb-price-box">
+          <div class="sb-price">40〜80万円/月</div>
+          <div class="sb-lead">3ヶ月〜 / 一括払い対応</div>
+        </div>
+      </div>
+
+      <!-- Plans -->
+      <div class="plans">
+        <div class="plan">
+          <div class="plan-name">ライト</div>
+          <div class="plan-price">40万円/月</div>
+          <ul class="plan-features">
+            <li class="plan-feature">1プラットフォーム</li>
+            <li class="plan-feature">投稿20本/月</li>
+            <li class="plan-feature">AI生成画像・テキスト</li>
+            <li class="plan-feature">月次レポート</li>
+          </ul>
+        </div>
+        <div class="plan recommended">
+          <div class="plan-name">スタンダード <span class="rec-badge">推奨</span></div>
+          <div class="plan-price">60万円/月</div>
+          <ul class="plan-features">
+            <li class="plan-feature">2プラットフォーム</li>
+            <li class="plan-feature">投稿30本/月</li>
+            <li class="plan-feature">リール・ショート動画対応</li>
+            <li class="plan-feature">コメント・DM管理</li>
+            <li class="plan-feature">月次戦略ミーティング</li>
+          </ul>
+        </div>
+        <div class="plan">
+          <div class="plan-name">プレミアム</div>
+          <div class="plan-price">80万円/月</div>
+          <ul class="plan-features">
+            <li class="plan-feature">3プラットフォーム</li>
+            <li class="plan-feature">投稿40本/月</li>
+            <li class="plan-feature">動画月4本含む</li>
+            <li class="plan-feature">広告運用サポート</li>
+            <li class="plan-feature">週次レポート</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sb-detail" style="border-top: 1px solid #f0f0f0;">
+        <div class="sd-col">
+          <div class="sd-label">対応プラットフォーム</div>
+          <div class="sd-tags">
+            <span class="sd-tag">Instagram</span>
+            <span class="sd-tag">TikTok</span>
+            <span class="sd-tag">X (Twitter)</span>
+            <span class="sd-tag">YouTube Shorts</span>
+            <span class="sd-tag">LinkedIn</span>
+          </div>
+        </div>
+        <div class="sd-col">
+          <div class="sd-label">使用ツール</div>
+          <div class="sd-tags">
+            <span class="sd-tag">Claude / ChatGPT</span>
+            <span class="sd-tag">Midjourney</span>
+            <span class="sd-tag">Runway</span>
+            <span class="sd-tag">Buffer</span>
+            <span class="sd-tag">Sprout Social</span>
+          </div>
+        </div>
+        <div class="sd-col">
+          <div class="sd-label">こんな課題に</div>
+          <ul class="sd-items">
+            <li class="sd-item">更新が止まっているアカウントがある</li>
+            <li class="sd-item">社内にSNS担当者を置けない</li>
+            <li class="sd-item">採用・集客にSNSを活用したい</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- S4: 企画コンサル -->
+    <div class="service-block">
+      <div class="sb-head">
+        <div class="sb-left">
+          <div class="sb-no">S-04 ／ 企画・コンサルティング</div>
+          <div class="sb-name">マーケティング戦略 &amp; キャンペーン企画</div>
+          <div class="sb-tagline">デジタル・クリエイティブ・AIの3軸から事業の課題を整理し、実行可能な打ち手を提案。<br>S1〜S3の入口として機能。小規模スポットから対応可。</div>
+        </div>
+        <div class="sb-price-box">
+          <div class="sb-price">50〜100万円</div>
+          <div class="sb-lead">納期 1〜2週間</div>
+        </div>
+      </div>
+
+      <div class="sb-detail">
+        <div class="sd-col">
+          <div class="sd-label">成果物</div>
+          <ul class="sd-items">
+            <li class="sd-item">SNS・コンテンツ戦略書</li>
+            <li class="sd-item">3〜6ヶ月コンテンツカレンダー</li>
+            <li class="sd-item">キャンペーン企画書</li>
+            <li class="sd-item">競合・市場調査レポート</li>
+            <li class="sd-item">クリエイティブガイドライン</li>
+          </ul>
+        </div>
+        <div class="sd-col">
+          <div class="sd-label">対応できる相談</div>
+          <ul class="sd-items">
+            <li class="sd-item">SNSを始めたいが何から手をつければいいか</li>
+            <li class="sd-item">動画制作を社内で内製化したい</li>
+            <li class="sd-item">AIをどこに使えばコスト削減になるか</li>
+            <li class="sd-item">競合他社と差別化したい</li>
+          </ul>
+        </div>
+        <div class="sd-col">
+          <div class="sd-label">こんな企業に</div>
+          <ul class="sd-items">
+            <li class="sd-item">BtoC・BtoB問わず</li>
+            <li class="sd-item">年商1億〜50億規模の中小・中堅企業</li>
+            <li class="sd-item">マーケ専任がいない、または1名体制</li>
+            <li class="sd-item">DX推進・AI活用を検討している</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 想定ユースケース -->
+    <div style="margin-top: 52px; margin-bottom: 52px;">
+      <div class="section-label">想定ユースケース</div>
+      <div class="cases-grid">
+        <div class="case-card">
+          <div class="case-industry">製造業</div>
+          <div class="case-title">採用難を動画と<br>SNSで突破</div>
+          <div class="case-result">採用動画＋Instagram運用で応募数3倍。中途採用コストを大幅削減。</div>
+          <span class="case-service">S2 + S3</span>
+        </div>
+        <div class="case-card">
+          <div class="case-industry">不動産</div>
+          <div class="case-title">問い合わせ対応を<br>AIで90%自動化</div>
+          <div class="case-result">LINEチャットbotで深夜の物件問い合わせに自動返答。担当者の工数を週15時間削減。</div>
+          <span class="case-service">S1</span>
+        </div>
+        <div class="case-card">
+          <div class="case-industry">飲食・小売</div>
+          <div class="case-title">TikTokで新規集客<br>月100万リーチ達成</div>
+          <div class="case-result">AI動画＋TikTok運用でゼロからフォロワー1万人。来店予約が月30%増加。</div>
+          <span class="case-service">S2 + S3</span>
+        </div>
+        <div class="case-card">
+          <div class="case-industry">IT・SaaS</div>
+          <div class="case-title">営業資料・見積もりを<br>AI自動生成</div>
+          <div class="case-result">Notion + Claude APIで提案書の自動生成を実装。営業1人あたり月20時間削減。</div>
+          <span class="case-service">S1</span>
+        </div>
+        <div class="case-card">
+          <div class="case-industry">ブライダル</div>
+          <div class="case-title">式場紹介動画を<br>2週間で制作</div>
+          <div class="case-result">AI映像生成×実撮影ハイブリッドで従来の半分の期間・コストで完成。</div>
+          <span class="case-service">S2</span>
+        </div>
+        <div class="case-card">
+          <div class="case-industry">人材・HR</div>
+          <div class="case-title">AI活用の戦略設計<br>から始めたい</div>
+          <div class="case-result">まずコンサルで全体戦略を設計。AI導入箇所を特定し、段階的に実装。</div>
+          <span class="case-service">S4 → S1</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta">
+      <div>
+        <h3>まずは無料相談から。</h3>
+        <p>
+          課題をお聞きし、3営業日以内に提案書をご提出します。<br>
+          ご予算・スケジュールに合わせてカスタマイズ対応可能です。
+        </p>
+      </div>
+      <div class="cta-right">
+        <div class="cta-email">x.kana@initie.co.jp</div>
+        <div class="cta-note">平日 10:00〜18:00 対応</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-brand">AI Creative Studio — Service Menu</div>
+    <div class="footer-date">2026.06 ／ 料金はすべて税別</div>
+  </div>
+
+</div>
+</body>
+</html>
