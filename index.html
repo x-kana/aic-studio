@@ -8,16 +8,17 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Noto Sans JP', sans-serif; background: #0f0f0f; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-  .wrap { max-width: 480px; width: 100%; padding: 40px 24px; }
+  .wrap { max-width: 520px; width: 100%; padding: 40px 24px; }
   .label { font-size: 10px; letter-spacing: 0.25em; color: #555; text-transform: uppercase; margin-bottom: 16px; }
   h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
-  .sub { font-size: 13px; color: #555; margin-bottom: 40px; }
-  .links { display: flex; flex-direction: column; gap: 12px; }
-  a { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border: 1px solid #222; border-radius: 12px; text-decoration: none; color: #fff; transition: border-color 0.2s, background 0.2s; }
+  .sub { font-size: 13px; color: #555; margin-bottom: 32px; }
+  .group-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; color: #444; text-transform: uppercase; margin: 20px 0 10px; }
+  .links { display: flex; flex-direction: column; gap: 8px; }
+  a { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: 1px solid #222; border-radius: 10px; text-decoration: none; color: #fff; transition: border-color 0.2s, background 0.2s; }
   a:hover { border-color: #fff; background: #1a1a1a; }
-  .doc-name { font-size: 14px; font-weight: 600; }
-  .doc-desc { font-size: 11px; color: #555; margin-top: 3px; }
-  .arrow { color: #444; font-size: 18px; }
+  .doc-name { font-size: 13px; font-weight: 600; }
+  .doc-desc { font-size: 11px; color: #555; margin-top: 2px; }
+  .arrow { color: #444; font-size: 16px; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -25,6 +26,8 @@
   <div class="label">AI Creative Studio</div>
   <h1>Documents</h1>
   <p class="sub">2026.06</p>
+
+  <div class="group-label">クリエイティブ事業</div>
   <div class="links">
     <a href="2026-06-03_AIクリエイティブスタジオ_サービスメニュー.html">
       <div><div class="doc-name">サービスメニュー</div><div class="doc-desc">4サービスの詳細・価格・ユースケース</div></div>
@@ -36,6 +39,14 @@
     </a>
     <a href="2026-06-03_AIクリエイティブスタジオ_ビジネスモデル戦略.html">
       <div><div class="doc-name">ビジネスモデル戦略</div><div class="doc-desc">Claude自動化・薄利多売モデルの検討</div></div>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="group-label">検品AIカメラ事業</div>
+  <div class="links">
+    <a href="2026-06-03_検品AIカメラ_南大阪営業先リスト.html">
+      <div><div class="doc-name">南大阪 営業先リスト</div><div class="doc-desc">富田林・羽曳野・河内長野の食品・木工・梱包工場</div></div>
       <span class="arrow">→</span>
     </a>
   </div>

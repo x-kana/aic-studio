@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>検品AIカメラ — 南大阪営業先リスト</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #f4f4f2; color: #1a1a1a; }
+  .page { max-width: 1000px; margin: 0 auto; background: #fff; }
+
+  /* Header */
+  .header { background: #0f0f0f; color: #fff; padding: 48px 64px 44px; position: relative; overflow: hidden; }
+  .header::before { content: ''; position: absolute; top: -80px; right: -80px; width: 300px; height: 300px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.05); }
+  .badge { font-size: 10px; font-weight: 600; letter-spacing: 0.25em; color: #555; text-transform: uppercase; margin-bottom: 14px; }
+  .header h1 { font-size: 26px; font-weight: 700; line-height: 1.3; margin-bottom: 12px; }
+  .header h1 em { font-style: normal; color: #555; font-weight: 300; }
+  .header-meta { display: flex; gap: 24px; margin-top: 28px; }
+  .hm-item { border-left: 2px solid #333; padding-left: 14px; }
+  .hm-label { font-size: 10px; color: #555; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+  .hm-value { font-size: 13px; font-weight: 600; color: #ccc; }
+
+  /* Body */
+  .body { padding: 0 64px 72px; }
+
+  /* Section */
+  .section { padding-top: 48px; }
+  .section-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid #ececec; }
+  .section-no { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #ccc; text-transform: uppercase; }
+  .section-title { font-size: 18px; font-weight: 700; }
+
+  /* Strategy cards */
+  .strategy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .sc { border: 1px solid #e8e8e8; border-radius: 12px; padding: 18px 20px; }
+  .sc.primary { background: #0f0f0f; border-color: #0f0f0f; }
+  .sc-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #bbb; margin-bottom: 8px; }
+  .sc.primary .sc-label { color: #444; }
+  .sc-value { font-size: 14px; font-weight: 700; margin-bottom: 4px; line-height: 1.4; }
+  .sc.primary .sc-value { color: #fff; }
+  .sc-note { font-size: 11px; color: #999; line-height: 1.5; }
+  .sc.primary .sc-note { color: #555; }
+
+  /* Industry tabs */
+  .industry-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .industry-tab { font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 100px; border: 1px solid #e8e8e8; color: #666; cursor: default; }
+  .industry-tab.food { background: #fff8e0; border-color: #f0d060; color: #886600; }
+  .industry-tab.wood { background: #f0fff4; border-color: #60c080; color: #226633; }
+  .industry-tab.pack { background: #f0f4ff; border-color: #6080d0; color: #224488; }
+  .industry-tab.textile { background: #fff0f8; border-color: #d060a0; color: #882255; }
+
+  /* Company table */
+  .company-section { margin-bottom: 36px; }
+  .company-section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 700; margin-bottom: 14px;
+    padding: 10px 16px; border-radius: 8px;
+  }
+  .company-section-title.food { background: #fff8e0; color: #886600; }
+  .company-section-title.wood { background: #f0fff4; color: #226633; }
+  .company-section-title.pack { background: #f0f4ff; color: #224488; }
+  .company-section-title.other { background: #f4f4f2; color: #444; }
+
+  .company-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .food .company-dot { background: #f0d060; }
+  .wood .company-dot { background: #60c080; }
+  .pack .company-dot { background: #6080d0; }
+  .other .company-dot { background: #999; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 4px; }
+  th { background: #f4f4f2; font-weight: 600; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #999; padding: 9px 14px; text-align: left; }
+  td { padding: 12px 14px; border-bottom: 1px solid #f4f4f2; color: #444; vertical-align: top; line-height: 1.5; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafaf9; }
+
+  .co-name { font-weight: 700; color: #0f0f0f; font-size: 13px; }
+  .co-address { font-size: 11px; color: #aaa; margin-top: 2px; }
+
+  .priority { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+  .priority.high { background: #0f0f0f; color: #fff; }
+  .priority.mid { background: #f4f4f2; color: #555; }
+  .priority.tbd { background: #fff; border: 1px solid #e0e0e0; color: #aaa; }
+
+  .use-tag { display: inline-block; font-size: 10px; background: #f4f4f2; color: #666; padding: 2px 7px; border-radius: 4px; margin: 2px 2px 0 0; }
+
+  .status { display: inline-block; font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 100px; }
+  .status.ready { background: #e8f5e9; color: #2e7d32; }
+  .status.research { background: #fff8e0; color: #f57f17; }
+  .status.approach { background: #e3f2fd; color: #1565c0; }
+
+  /* Data sources */
+  .sources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .source-card { border: 1px solid #e8e8e8; border-radius: 12px; padding: 18px 20px; }
+  .source-name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .source-url { font-size: 11px; color: #6080d0; margin-bottom: 8px; word-break: break-all; }
+  .source-desc { font-size: 11px; color: #888; line-height: 1.6; }
+  .source-action { display: inline-block; font-size: 10px; font-weight: 600; background: #0f0f0f; color: #fff; padding: 4px 10px; border-radius: 6px; margin-top: 8px; }
+
+  /* Approach */
+  .approach-steps { display: flex; flex-direction: column; gap: 12px; }
+  .ap-step { display: flex; gap: 16px; padding: 16px 20px; border: 1px solid #e8e8e8; border-radius: 12px; align-items: flex-start; }
+  .ap-num { width: 28px; height: 28px; border-radius: 50%; background: #0f0f0f; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .ap-content { flex: 1; }
+  .ap-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .ap-desc { font-size: 12px; color: #777; line-height: 1.6; }
+  .ap-timing { font-size: 10px; font-weight: 600; color: #aaa; margin-top: 6px; letter-spacing: 0.05em; }
+
+  /* Script */
+  .script-box { background: #f4f4f2; border-radius: 12px; padding: 20px 24px; margin-top: 16px; font-size: 12px; color: #444; line-height: 1.9; border-left: 3px solid #0f0f0f; }
+  .script-box strong { color: #0f0f0f; font-weight: 700; }
+
+  /* KPI */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kpi-card { border: 1px solid #e8e8e8; border-radius: 12px; padding: 16px 18px; text-align: center; }
+  .kpi-num { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .kpi-label { font-size: 11px; color: #999; line-height: 1.4; }
+
+  /* Footer */
+  .footer { padding: 22px 64px; border-top: 1px solid #ececec; display: flex; justify-content: space-between; align-items: center; }
+  .footer-brand { font-size: 12px; font-weight: 700; }
+  .footer-note { font-size: 11px; color: #ccc; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="badge">Sales Target List</div>
+    <h1>検品AIカメラ（スマホ撮影型）<br><em>南大阪 営業先リスト</em></h1>
+    <div class="header-meta">
+      <div class="hm-item"><div class="hm-label">対象エリア</div><div class="hm-value">富田林・羽曳野・河内長野・藤井寺・河南町</div></div>
+      <div class="hm-item"><div class="hm-label">ターゲット業種</div><div class="hm-value">食品加工・木工・梱包・繊維</div></div>
+      <div class="hm-item"><div class="hm-label">想定単価</div><div class="hm-value">月10〜30万円</div></div>
+      <div class="hm-item"><div class="hm-label">作成日</div><div class="hm-value">2026.06.03</div></div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- 01. ターゲット戦略 -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-no">01</span>
+        <span class="section-title">ターゲット戦略</span>
+      </div>
+      <div class="strategy-grid">
+        <div class="sc primary">
+          <div class="sc-label">狙う業種</div>
+          <div class="sc-value">食品加工・惣菜・梱包・木工</div>
+          <div class="sc-note">スマホ撮影で検査精度が出せる業種に絞る。金属精密・電子部品は対象外。</div>
+        </div>
+        <div class="sc">
+          <div class="sc-label">ターゲット規模</div>
+          <div class="sc-value">従業員10〜100人<br>年商1億〜10億</div>
+          <div class="sc-note">大手は内製、零細は予算なし。この規模が「困っているが解決策がない」層。</div>
+        </div>
+        <div class="sc">
+          <div class="sc-label">切り口</div>
+          <div class="sc-value">「目視補助ツール」として提案</div>
+          <div class="sc-note">完全自動化ではなく「見落とし削減・基準統一・記録残す」の価値で売る。</div>
+        </div>
+      </div>
+
+      <div class="industry-tabs">
+        <span class="industry-tab food">◎ 食品加工・惣菜</span>
+        <span class="industry-tab wood">○ 木工・建材</span>
+        <span class="industry-tab pack">○ 梱包・物流</span>
+        <span class="industry-tab textile">○ 繊維・縫製</span>
+      </div>
+    </div>
+
+    <!-- 02. 富田林市 確認済み企業 -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-no">02</span>
+        <span class="section-title">富田林市 — 確認済み営業候補</span>
+      </div>
+
+      <div class="company-section">
+        <div class="company-section-title food">
+          <div class="company-dot"></div>食品加工・食品製造
+        </div>
+        <table>
+          <thead>
+            <tr><th>会社名</th><th>事業内容</th><th>想定ユースケース</th><th>優先度</th><th>ステータス</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="co-name">株式会社ニッキーフーズ<br>富田林工場</div>
+                <div class="co-address">富田林市中野町東2-5-39</div>
+              </td>
+              <td>缶詰・レトルト・冷凍食品・麺類製造</td>
+              <td>
+                <span class="use-tag">異物混入確認</span>
+                <span class="use-tag">包装状態検査</span>
+                <span class="use-tag">ラベル確認</span>
+              </td>
+              <td><span class="priority high">最優先</span></td>
+              <td><span class="status ready">アプローチ可</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="co-name">食品工房株式会社</div>
+                <div class="co-address">富田林市若松町5丁目3番3号</div>
+              </td>
+              <td>畜産物を用いた缶詰・食品の開発・卸売</td>
+              <td>
+                <span class="use-tag">外観検査</span>
+                <span class="use-tag">異物確認</span>
+              </td>
+              <td><span class="priority high">最優先</span></td>
+              <td><span class="status ready">アプローチ可</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="co-name">タナカ理研株式会社</div>
+                <div class="co-address">富田林市西板持町1丁目86番地</div>
+              </td>
+              <td>ソース類・食品添加物・食用油・フライ食品製造<br><small style="color:#aaa;">資本金5,000万 / 1975年設立</small></td>
+              <td>
+                <span class="use-tag">充填量確認</span>
+                <span class="use-tag">包装状態</span>
+                <span class="use-tag">ラベル検査</span>
+              </td>
+              <td><span class="priority high">最優先</span></td>
+              <td><span class="status ready">アプローチ可</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="co-name">開屋本舗株式会社</div>
+                <div class="co-address">富田林市中野町1丁目205番地1</div>
+              </td>
+              <td>食品関連製造</td>
+              <td>
+                <span class="use-tag">外観検査</span>
+                <span class="use-tag">包装確認</span>
+              </td>
+              <td><span class="priority mid">中</span></td>
+              <td><span class="status research">詳細調査要</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="company-section">
+        <div class="company-section-title wood">
+          <div class="company-dot"></div>木工・木材加工
+        </div>
+        <table>
+          <thead>
+            <tr><th>会社名</th><th>事業内容</th><th>想定ユースケース</th><th>優先度</th><th>ステータス</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="co-name">豆本木材工業株式会社</div>
+                <div class="co-address">富田林市（詳細要確認）</div>
+              </td>
+              <td>木材加工・建材製造</td>
+              <td>
+                <span class="use-tag">節・割れ検査</span>
+                <span class="use-tag">色むら確認</span>
+                <span class="use-tag">寸法外観</span>
+              </td>
+              <td><span class="priority mid">中</span></td>
+              <td><span class="status research">詳細調査要</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="company-section">
+        <div class="company-section-title other">
+          <div class="company-dot"></div>その他・要調査（富田林市公式サイト掲載99社）
+        </div>
+        <table>
+          <thead>
+            <tr><th>会社名</th><th>事業内容</th><th>備考</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="co-name">株式会社 富田屋</div></td>
+              <td>製造業（詳細未確認）</td>
+              <td>富田林市公式サイトに掲載。業種確認後アプローチ判断</td>
+            </tr>
+            <tr>
+              <td><div class="co-name">大阪富田林工業団地<br>協同組合（加盟各社）</div></td>
+              <td>工業団地内の製造業各社</td>
+              <td>組合経由でまとめてアプローチできる可能性あり</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 03. 周辺エリア ターゲット -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-no">03</span>
+        <span class="section-title">周辺エリア — ターゲット企業タイプ</span>
+      </div>
+
+      <div class="company-section">
+        <div class="company-section-title food">
+          <div class="company-dot"></div>羽曳野市（食料品製造業 複数社 / 製造業834社登録）
+        </div>
+        <table>
+          <thead>
+            <tr><th>業種タイプ</th><th>想定ユースケース</th><th>アプローチ方法</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>惣菜・弁当製造工場</td>
+              <td><span class="use-tag">盛り付け確認</span><span class="use-tag">異物混入</span><span class="use-tag">ラベル</span></td>
+              <td>アラームボックス掲載企業リストから抽出</td>
+            </tr>
+            <tr>
+              <td>食品OEM・受託加工</td>
+              <td><span class="use-tag">外観検査</span><span class="use-tag">包装確認</span></td>
+              <td>商工会経由で紹介</td>
+            </tr>
+            <tr>
+              <td>農産物加工（ぶどう・梨）</td>
+              <td><span class="use-tag">等級選別補助</span><span class="use-tag">傷確認</span></td>
+              <td>JA南河内経由でアプローチ</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="company-section">
+        <div class="company-section-title pack">
+          <div class="company-dot"></div>河内長野市（製造業519社登録）
+        </div>
+        <table>
+          <thead>
+            <tr><th>業種タイプ</th><th>想定ユースケース</th><th>アプローチ方法</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>梱包・包装資材製造</td>
+              <td><span class="use-tag">印刷確認</span><span class="use-tag">折り目・傷</span><span class="use-tag">寸法外観</span></td>
+              <td>イプロスものづくりから企業特定</td>
+            </tr>
+            <tr>
+              <td>木工・家具製造</td>
+              <td><span class="use-tag">塗装ムラ</span><span class="use-tag">傷・欠け</span><span class="use-tag">組み付け確認</span></td>
+              <td>河内長野商工会議所経由</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="company-section">
+        <div class="company-section-title textile">
+          <div class="company-dot"></div>藤井寺市・太子町（繊維・縫製 中小工場）
+        </div>
+        <table>
+          <thead>
+            <tr><th>業種タイプ</th><th>想定ユースケース</th><th>アプローチ方法</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>縫製・アパレル製造</td>
+              <td><span class="use-tag">縫い目確認</span><span class="use-tag">汚れ・毛羽立ち</span><span class="use-tag">ラベル確認</span></td>
+              <td>富田林商工会 太子町支部経由</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 04. 企業リストを増やすデータソース -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-no">04</span>
+        <span class="section-title">企業リストを増やすデータソース</span>
+      </div>
+      <div class="sources-grid">
+        <div class="source-card">
+          <div class="source-name">富田林市公式 製造企業情報</div>
+          <div class="source-url">city.tondabayashi.lg.jp/soshiki/36/1385.html</div>
+          <div class="source-desc">市内製造業99社が業種・住所・事業内容付きで掲載。無料で全件確認できる。まず全件チェックして食品・木工・梱包を絞り込む。</div>
+          <span class="source-action">最初に全件確認</span>
+        </div>
+        <div class="source-card">
+          <div class="source-name">富田林商工会</div>
+          <div class="source-url">tonshow.or.jp</div>
+          <div class="source-desc">入会（年数千円〜）すると会員企業と直接繋がれる。異業種交流会への参加で経営者に直接アプローチできる。地元での最速ネットワーク構築手段。</div>
+          <span class="source-action">即入会を検討</span>
+        </div>
+        <div class="source-card">
+          <div class="source-name">アラームボックス（羽曳野市 食料品製造業）</div>
+          <div class="source-url">alarmbox.jp/companyinfo/osaka/city1141/middle-industries9</div>
+          <div class="source-desc">羽曳野市の食料品製造業企業リストが無料で閲覧可能。会社名・所在地・従業員数まで確認できる。</div>
+          <span class="source-action">リスト抽出に使う</span>
+        </div>
+        <div class="source-card">
+          <div class="source-name">イプロスものづくり（河内長野・富田林）</div>
+          <div class="source-url">ipros.jp/ranking/company/area/city/27214/</div>
+          <div class="source-desc">ものづくり系企業のBtoBデータベース。エリア・業種で絞り込み可。問い合わせフォームから直接営業アプローチも可能。</div>
+          <span class="source-action">業種絞り込みに使う</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 05. 営業アプローチ手順 -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-no">05</span>
+        <span class="section-title">営業アプローチ手順</span>
+      </div>
+      <div class="approach-steps">
+        <div class="ap-step">
+          <div class="ap-num">1</div>
+          <div class="ap-content">
+            <div class="ap-title">富田林市公式サイトで99社を全件確認 → 食品・木工・梱包を絞り込む</div>
+            <div class="ap-desc">無料・今日できる。まず20〜30社のターゲットリストを作る。住所・事業内容・電話番号まで確認可能。</div>
+            <div class="ap-timing">所要時間: 2〜3時間 / 今日</div>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-num">2</div>
+          <div class="ap-content">
+            <div class="ap-title">富田林商工会に入会 → 異業種交流会に参加</div>
+            <div class="ap-desc">工場経営者と直接会える最速の場。「AI検品ツールを開発している」と話すだけで興味を持ってもらいやすい。紹介も生まれやすい。</div>
+            <div class="ap-timing">所要時間: 入会手続き1日 / 次回交流会に参加</div>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-num">3</div>
+          <div class="ap-content">
+            <div class="ap-title">ニッキーフーズ・タナカ理研・食品工房に直接アポ電</div>
+            <div class="ap-desc">住所・会社名が確認済みの3社に電話。「検品の人手不足・見落とし課題を解決するAIツールの無料見学をさせてください」でアポを取る。</div>
+            <div class="ap-timing">所要時間: 1社15分 / 今週中</div>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-num">4</div>
+          <div class="ap-content">
+            <div class="ap-title">工場見学 → その場でスマホデモ</div>
+            <div class="ap-desc">現地でスマホで製品を撮影し、Claude Vision APIで即座に判定してみせる。「こういうことができます」を実演するだけで差別化になる。</div>
+            <div class="ap-timing">所要時間: 1〜2時間/社 / 来週以降</div>
+          </div>
+        </div>
+        <div class="ap-step">
+          <div class="ap-num">5</div>
+          <div class="ap-content">
+            <div class="ap-title">無料PoC（2週間）から始める → 受注</div>
+            <div class="ap-desc">「まず2週間無料で試してください」で導入ハードルを下げる。成果が出たら月10〜30万の契約へ。実績ゼロの初期はこれが最速の受注方法。</div>
+            <div class="ap-timing">PoC期間: 2週間 → 契約へ</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 電話トークスクリプト -->
+      <div style="margin-top: 24px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #bbb; text-transform: uppercase; margin-bottom: 12px;">電話アポのトークスクリプト（例）</div>
+        <div class="script-box">
+          「お世話になります。AIクリエイティブスタジオと申します。<br>
+          <strong>食品製造ラインでの検品業務</strong>に、スマートフォンとAIを使って<br>
+          <strong>見落としを減らし、基準を統一するツール</strong>を開発しております。<br><br>
+          現在、南大阪の食品工場様に無料でお試しいただいており、<br>
+          ぜひ御社の現場を一度見せていただけないでしょうか？<br>
+          30分ほどで結構です。いかがでしょうか？」
+        </div>
+      </div>
+    </div>
+
+    <!-- 06. KPI -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-no">06</span>
+        <span class="section-title">南大阪営業 KPI目標</span>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-num">30社</div>
+          <div class="kpi-label">初期リスト<br>作成目標</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num">10件</div>
+          <div class="kpi-label">アポ獲得<br>（Month 3）</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num">3社</div>
+          <div class="kpi-label">無料PoC<br>実施目標</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-num">1社</div>
+          <div class="kpi-label">初月<br>契約目標</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <div class="footer-brand">AI Creative Studio — 検品AIカメラ 営業先リスト</div>
+    <div class="footer-note">2026.06.03 作成 ／ 随時更新</div>
+  </div>
+
+</div>
+</body>
+</html>
