@@ -176,6 +176,35 @@
     }
     .login-help { font-size: 12px; color: var(--sub); margin-top: 20px; line-height: 1.8; text-align: center; }
     .login-state-ok { background: var(--green-soft); color: var(--green); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+
+    /* 冷蔵庫スイッチャー */
+    .fridge-switch {
+      background: none; border: none; font-size: 20px; font-weight: 700; color: var(--ink);
+      cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px; max-width: 78%;
+    }
+    .fridge-switch #cur-fridge { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .fridge-switch .caret { color: var(--sub); font-size: 14px; }
+    .fridge-row {
+      display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+      background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+      padding: 14px; margin-bottom: 8px; cursor: pointer; font-size: 15px; font-weight: 600; color: var(--ink);
+    }
+    .fridge-row.current { border-color: var(--teal); background: var(--teal-soft); }
+    .fridge-row .fr-emoji { font-size: 22px; }
+    .fridge-row .fr-name { flex: 1; }
+    .fridge-row .fr-check { color: var(--teal); font-weight: 700; }
+    .share-code {
+      background: #fff; border: 1px dashed var(--teal); border-radius: 12px; padding: 12px 14px;
+      margin: 4px 0 6px; font-size: 13px; color: var(--sub);
+    }
+    .share-code b { font-size: 20px; color: var(--teal); letter-spacing: 2px; font-family: ui-monospace, monospace; }
+    .sheet hr { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
+    .row-inline { display: flex; gap: 8px; }
+    .row-inline input { flex: 1; }
+    .row-inline button {
+      flex: 0 0 auto; border: none; border-radius: 12px; padding: 0 18px; font-size: 14px;
+      font-weight: 700; background: var(--teal); color: #fff; cursor: pointer;
+    }
     .help { font-size: 12px; color: var(--sub); margin-top: 8px; line-height: 1.7; }
     .help a { color: var(--teal); }
 
@@ -223,10 +252,8 @@
         <input id="rg-email" type="email" inputmode="email" autocomplete="username" placeholder="you@example.com">
         <label>パスワード</label>
         <input id="rg-pass" type="password" autocomplete="new-password" placeholder="6文字以上">
-        <label>家族の合言葉</label>
-        <input id="rg-house" autocomplete="off" placeholder="例：tanaka2026">
         <p class="login-help" style="margin:6px 0 0; text-align:left">
-          家族みんなで<b>同じ合言葉</b>を入れると同じ冷蔵庫になります。<br>初めての言葉なら新しい冷蔵庫が作られます。
+          登録のあと、冷蔵庫を「作る」か、家族からもらった合言葉で「参加する」を選べます。
         </p>
         <div id="rg-msg"></div>
         <button class="btn btn-add" style="width:100%;margin-top:18px" onclick="register()">登録する</button>
@@ -237,7 +264,9 @@
 
   <header>
     <div class="title-row">
-      <h1><span class="leaf">🌿</span> 冷蔵庫メモ</h1>
+      <button class="fridge-switch" onclick="openSheet('fridges')" aria-label="冷蔵庫を切り替え">
+        <span class="leaf">🌿</span> <span id="cur-fridge">冷蔵庫メモ</span> <span class="caret">▾</span>
+      </button>
       <button class="gear" onclick="openSheet('settings')" aria-label="設定">⚙️</button>
     </div>
     <div class="summary" id="summary"></div>
@@ -341,8 +370,30 @@
 
       <button class="btn btn-add" onclick="saveSettings()">保存</button>
       <p class="help" style="margin-top:18px">
-        食材データはアカウント（家族の合言葉）ごとにクラウド保存されます。同じ合言葉の家族で共有され、機種変しても残ります。
+        食材データは冷蔵庫ごとにクラウド保存されます。合言葉を教え合えば会員同士で共有でき、機種変しても残ります。
       </p>
+    </div>
+  </div>
+
+  <!-- 冷蔵庫の切り替え -->
+  <div class="overlay" id="ov-fridges" onclick="if(event.target===this)closeSheet()">
+    <div class="sheet">
+      <div class="grab"></div>
+      <h2>🧊 冷蔵庫を切り替え</h2>
+      <div id="fridge-list"></div>
+      <div id="fridge-share"></div>
+      <hr>
+      <label>新しい冷蔵庫を作る</label>
+      <div class="row-inline">
+        <input id="nf-name" placeholder="例：わが家、実家" autocomplete="off">
+        <button onclick="createFridge()">作る</button>
+      </div>
+      <label>合言葉で参加する</label>
+      <div class="row-inline">
+        <input id="jf-code" placeholder="家族からもらった合言葉" autocomplete="off" style="text-transform:uppercase">
+        <button onclick="joinFridge()">参加</button>
+      </div>
+      <div id="fridge-msg"></div>
     </div>
   </div>
 
@@ -353,14 +404,20 @@
     const KEY = 'fridge.items.v1';
     const CFG = 'fridge.config.v1';
     const AUTH = 'fridge.auth.v1';
+    const FRIDGES = 'fridge.list.v1';
+    const CURRENT = 'fridge.current.v1';
     let items = load(KEY, []);
     let cfg = load(CFG, { apiKey: '', model: 'claude-opus-4-8', warnDays: 3 });
-    let auth = load(AUTH, {});                 // { token, email, name, household }
+    let auth = load(AUTH, {});                 // { token, email, name }
+    let fridges = load(FRIDGES, []);           // [{ fridgeId, name, code }]
+    let currentId = load(CURRENT, '');         // 今表示している冷蔵庫のID
     let filter = 'all';
 
     function load(k, def) { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } }
     function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
     const loggedIn = () => !!auth.token;
+    const curFridge = () => fridges.find(f => f.fridgeId === currentId) || null;
+    const hasFridge = () => !!curFridge();
 
     // 画面下に短いメッセージ
     let toastT;
@@ -381,12 +438,12 @@
       return res.json();
     }
 
-    // 自分の家族の食材を取得
+    // 今の冷蔵庫の食材を取得
     async function pullCloud(silent) {
-      if (!loggedIn()) return;
+      if (!loggedIn() || !hasFridge()) return;
       try {
         if (!silent) toast('読み込み中…');
-        const res = await fetch(API + '?action=list&token=' + encodeURIComponent(auth.token), { method:'GET' });
+        const res = await fetch(API + '?action=list&token=' + encodeURIComponent(auth.token) + '&fridge=' + encodeURIComponent(currentId), { method:'GET' });
         const data = await res.json();
         if (data.ok && Array.isArray(data.items)) {
           items = data.items; save(KEY, items); render();
@@ -401,14 +458,20 @@
     // 追加・削除（成功すると最新の全件が返る）
     async function pushCloud(body) {
       body.token = auth.token;
+      body.fridge = currentId;
       const data = await api(body);
       if (data.ok && Array.isArray(data.items)) { items = data.items; save(KEY, items); }
-      else if (data.ok === false) { handleAuthError(data.error); throw new Error(data.error); }
+      else if (data.ok === false) {
+        if (/ログイン/.test(data.error || '')) handleAuthError(data.error);  // 認証切れのみログアウト
+        throw new Error(data.error || 'failed');
+      }
       return data;
     }
     // トークン切れなどはログイン画面へ戻す
     function handleAuthError(msg) {
-      auth = {}; save(AUTH, auth); items = []; save(KEY, items);
+      auth = {}; save(AUTH, auth);
+      fridges = []; save(FRIDGES, fridges); currentId = ''; save(CURRENT, currentId);
+      items = []; save(KEY, items);
       toast(msg || 'もう一度ログインしてください', false);
       render(); showLogin();
     }
@@ -434,9 +497,19 @@
 
     // ---------- 描画 ----------
     function render() {
+      updateCurFridgeName();
+      const sumEl = document.getElementById('summary');
+      // ログイン済みだが冷蔵庫が未選択：作成/参加を促す
+      if (loggedIn() && !hasFridge()) {
+        sumEl.innerHTML = '冷蔵庫を選んでください';
+        document.getElementById('filters').innerHTML = '';
+        document.getElementById('list').innerHTML =
+          `<div class="empty"><div class="big">🧊</div>まだ冷蔵庫がありません<br><br>`
+          + `<button class="btn btn-add" style="padding:12px 20px" onclick="openSheet('fridges')">冷蔵庫を作る／参加する</button></div>`;
+        return;
+      }
       // summary
       const near = items.filter(i => daysLeft(i.date) <= Number(cfg.warnDays)).length;
-      const sumEl = document.getElementById('summary');
       if (items.length === 0) sumEl.innerHTML = 'まだ食材がありません。下のボタンから追加しましょう。';
       else if (near > 0) sumEl.innerHTML = `登録 ${items.length} 件 ・ <b>期限が近い ${near} 件</b>`;
       else sumEl.innerHTML = `登録 ${items.length} 件 ・ 期限の近いものはありません 👍`;
@@ -528,6 +601,8 @@
 
     // ---------- シート ----------
     function openSheet(which) {
+      if ((which === 'add' || which === 'cook') && loggedIn() && !hasFridge()) { toast('先に冷蔵庫を選んでください'); which = 'fridges'; }
+      if (which === 'fridges') { renderFridges(); }
       if (which === 'add') {
         document.getElementById('f-name').value = '';
         document.getElementById('f-qty').value = '';
@@ -543,7 +618,7 @@
         document.getElementById('f-warn').value = cfg.warnDays;
         const st = document.getElementById('login-state');
         if (loggedIn()) {
-          st.innerHTML = `<div class="login-state-ok">ログイン中：${esc(auth.name||auth.email)}（合言葉：${esc(auth.household||'')}）</div>`
+          st.innerHTML = `<div class="login-state-ok">ログイン中：${esc(auth.name||auth.email)}</div>`
             + `<button class="login-link" style="text-align:left;padding-left:0" onclick="logout()">ログアウト</button>`;
         } else {
           st.innerHTML = `<button class="login-link" style="text-align:left;padding-left:0" onclick="closeSheet();showLogin()">ログイン</button>`;
@@ -582,14 +657,12 @@
       const name = document.getElementById('rg-name').value.trim();
       const email = document.getElementById('rg-email').value.trim();
       const pass = document.getElementById('rg-pass').value;
-      const house = document.getElementById('rg-house').value.trim();
       const msg = document.getElementById('rg-msg');
       if (!isEmail(email)) { msg.innerHTML = err('メールアドレスを正しく入れてください。'); return; }
       if (pass.length < 6) { msg.innerHTML = err('パスワードは6文字以上にしてください。'); return; }
-      if (!house) { msg.innerHTML = err('家族の合言葉を入れてください。'); return; }
       msg.innerHTML = loadingBox('登録しています…');
       try {
-        const data = await api({ action:'register', email, pass, name, household: house });
+        const data = await api({ action:'register', email, pass, name });
         if (!data.ok) { msg.innerHTML = err(data.error || '登録できませんでした。'); return; }
         finishAuth(data, '登録しました');
       } catch (e) { msg.innerHTML = err('接続できませんでした。通信を確認してください。'); }
@@ -607,17 +680,94 @@
       } catch (e) { msg.innerHTML = err('接続できませんでした。通信を確認してください。'); }
     }
     function finishAuth(data, okMsg) {
-      auth = { token: data.token, email: data.email, name: data.name, household: data.household };
+      auth = { token: data.token, email: data.email, name: data.name };
       save(AUTH, auth);
-      items = Array.isArray(data.items) ? data.items : [];
-      save(KEY, items);
+      fridges = Array.isArray(data.fridges) ? data.fridges : [];
+      save(FRIDGES, fridges);
+      if (!fridges.some(f => f.fridgeId === currentId)) currentId = fridges.length ? fridges[0].fridgeId : '';
+      save(CURRENT, currentId);
+      items = []; save(KEY, items);
       hideLogin(); render(); toast(okMsg);
+      if (hasFridge()) pullCloud(true);
+      else openSheet('fridges');     // 冷蔵庫がまだ無い → 作る/参加するを促す
     }
     function logout() {
       if (!confirm('ログアウトしますか？\n登録した食材はクラウドに残るので、次にログインすればまた見られます。')) return;
       auth = {}; save(AUTH, auth);
+      fridges = []; save(FRIDGES, fridges); currentId = ''; save(CURRENT, currentId);
       items = []; save(KEY, items);
       closeSheet(); render(); showLogin();
+    }
+
+    // ---------- 冷蔵庫の作成・参加・切替 ----------
+    function renderFridges() {
+      const listEl = document.getElementById('fridge-list');
+      const shareEl = document.getElementById('fridge-share');
+      document.getElementById('fridge-msg').innerHTML = '';
+      document.getElementById('nf-name').value = '';
+      document.getElementById('jf-code').value = '';
+      if (!fridges.length) {
+        listEl.innerHTML = `<p class="help" style="margin-top:0">まだ冷蔵庫がありません。下で「作る」か、家族の合言葉で「参加」してください。</p>`;
+        shareEl.innerHTML = '';
+        return;
+      }
+      listEl.innerHTML = fridges.map(f => `
+        <button class="fridge-row ${f.fridgeId===currentId?'current':''}" onclick="switchFridge('${f.fridgeId}')">
+          <span class="fr-emoji">🧊</span>
+          <span class="fr-name">${esc(f.name)}</span>
+          ${f.fridgeId===currentId?'<span class="fr-check">表示中 ✓</span>':''}
+        </button>`).join('');
+      const cf = curFridge();
+      shareEl.innerHTML = cf ? `<div class="share-code">この冷蔵庫の合言葉：<b>${esc(cf.code)}</b><br>家族に教えると、同じ冷蔵庫に参加してもらえます。</div>` : '';
+    }
+    function updateCurFridgeName() {
+      const cf = curFridge();
+      document.getElementById('cur-fridge').textContent = cf ? cf.name : '冷蔵庫メモ';
+    }
+    function switchFridge(id) {
+      if (id === currentId) { closeSheet(); return; }
+      currentId = id; save(CURRENT, currentId);
+      items = []; save(KEY, items);
+      closeSheet(); render(); pullCloud(false);
+    }
+    async function createFridge() {
+      const name = document.getElementById('nf-name').value.trim();
+      const msg = document.getElementById('fridge-msg');
+      if (!name) { msg.innerHTML = err('冷蔵庫の名前を入れてください。'); return; }
+      msg.innerHTML = loadingBox('作成中…');
+      try {
+        const data = await pushFridge({ action:'createFridge', name });
+        if (!data) return;
+        currentId = data.fridgeId; save(CURRENT, currentId);
+        items = []; save(KEY, items);
+        renderFridges(); render(); pullCloud(true);
+        msg.innerHTML = '';
+        toast('冷蔵庫を作りました');
+      } catch (e) { msg.innerHTML = err('作成に失敗しました。通信を確認してください。'); }
+    }
+    async function joinFridge() {
+      const code = document.getElementById('jf-code').value.trim().toUpperCase();
+      const msg = document.getElementById('fridge-msg');
+      if (!code) { msg.innerHTML = err('合言葉を入れてください。'); return; }
+      msg.innerHTML = loadingBox('参加中…');
+      try {
+        const data = await pushFridge({ action:'joinFridge', code });
+        if (!data) return;
+        if (!data.ok) { msg.innerHTML = err(data.error || '参加できませんでした。'); return; }
+        currentId = data.fridgeId; save(CURRENT, currentId);
+        items = []; save(KEY, items);
+        renderFridges(); render(); pullCloud(true);
+        msg.innerHTML = '';
+        toast('冷蔵庫に参加しました');
+      } catch (e) { msg.innerHTML = err('参加に失敗しました。通信を確認してください。'); }
+    }
+    // 冷蔵庫系API（fridges一覧を更新）。エラー(ok:false)はそのまま返す
+    async function pushFridge(body) {
+      body.token = auth.token;
+      const data = await api(body);
+      if (data.ok === false && /ログイン/.test(data.error || '')) { handleAuthError(data.error); return null; }
+      if (data.ok && Array.isArray(data.fridges)) { fridges = data.fridges; save(FRIDGES, fridges); }
+      return data;
     }
     const err = m => `<div class="photo-err">${m}</div>`;
     const loadingBox = m => `<div class="photo-loading"><div class="spinner"></div>${m}</div>`;
