@@ -279,12 +279,18 @@
         <option value="7">7日前</option>
       </select>
 
-      <label>👨‍👩‍👧 家族で共有（クラウド保存）</label>
+      <label>👨‍👩‍👧 家族で共有（クラウド保存）URL</label>
       <input id="f-cloud" type="url" placeholder="https://script.google.com/…/exec" autocomplete="off">
       <p class="help">
-        ここにURLを入れると、<b>家族みんなで1つの冷蔵庫を共有</b>でき、機種変しても残ります。<br>
-        <b>空欄ならこの端末の中だけ</b>に保存（今まで通り）。<br>
-        URLの作り方は同じフォルダの「クラウド保存の作り方」を参照。今の端末のデータは、共有をオンにすると自動でクラウドへ引き継がれます。
+        ここにURLを入れると、<b>家族で1つの冷蔵庫を共有</b>でき、機種変しても残ります。
+        <b>空欄ならこの端末の中だけ</b>に保存（今まで通り）。URLの作り方は同フォルダ「クラウド保存の作り方」参照。
+      </p>
+
+      <label>🔑 家族コード（合言葉）</label>
+      <input id="f-group" placeholder="例：tanaka2026" autocomplete="off">
+      <p class="help">
+        <b>同じ家族みんなで同じ合言葉</b>を入れてください。<b>別の家族は別の合言葉</b>にすれば、冷蔵庫は混ざりません。<br>
+        （URLは2家族で同じでOK。合言葉で分かれます。空欄なら「default」になります）
       </p>
 
       <button class="btn btn-add" onclick="saveSettings()">保存</button>
@@ -299,8 +305,10 @@
     const KEY = 'fridge.items.v1';
     const CFG = 'fridge.config.v1';
     let items = load(KEY, []);
-    let cfg = load(CFG, { apiKey: '', model: 'claude-opus-4-8', warnDays: 3, cloudUrl: '' });
+    let cfg = load(CFG, { apiKey: '', model: 'claude-opus-4-8', warnDays: 3, cloudUrl: '', groupCode: '' });
     let filter = 'all';
+    const grp = () => ((cfg.groupCode || 'default').trim() || 'default');           // 家族コード（合言葉）
+    const cloudGetUrl = () => cfg.cloudUrl + (cfg.cloudUrl.includes('?') ? '&' : '?') + 'group=' + encodeURIComponent(grp());
 
     function load(k, def) { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } }
     function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
@@ -320,7 +328,7 @@
       if (!cloudOn()) return;
       try {
         if (!silent) toast('読み込み中…');
-        const res = await fetch(cfg.cloudUrl, { method:'GET' });
+        const res = await fetch(cloudGetUrl(), { method:'GET' });
         const data = await res.json();
         items = Array.isArray(data.items) ? data.items : [];
         save(KEY, items); // オフライン用キャッシュ
@@ -332,6 +340,7 @@
     }
     // クラウドへ更新を送る（成功すると最新の全件が返る）
     async function pushCloud(body) {
+      body.group = grp();
       const res = await fetch(cfg.cloudUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // preflight回避
@@ -471,6 +480,7 @@
         document.getElementById('f-model').value = cfg.model;
         document.getElementById('f-warn').value = cfg.warnDays;
         document.getElementById('f-cloud').value = cfg.cloudUrl || '';
+        document.getElementById('f-group').value = cfg.groupCode || '';
       }
       if (which === 'cook') {
         document.getElementById('cook-content').innerHTML = '';
@@ -482,16 +492,17 @@
       document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open'));
     }
     async function saveSettings() {
-      const prevCloud = cfg.cloudUrl;
+      const prevCloud = cfg.cloudUrl, prevGroup = cfg.groupCode;
       cfg.apiKey = document.getElementById('f-key').value.trim();
       cfg.model = document.getElementById('f-model').value;
       cfg.warnDays = document.getElementById('f-warn').value;
       cfg.cloudUrl = document.getElementById('f-cloud').value.trim();
+      cfg.groupCode = document.getElementById('f-group').value.trim();
       save(CFG, cfg);
       closeSheet();
       render();
-      if (cloudOn() && cfg.cloudUrl !== prevCloud) {
-        await firstSync();        // 共有を新たにON：端末のデータをクラウドへ引き継ぎ
+      if (cloudOn() && (cfg.cloudUrl !== prevCloud || cfg.groupCode !== prevGroup)) {
+        await firstSync();        // 共有を新たにON／コード変更：端末のデータをクラウドへ引き継ぎ
       } else if (cloudOn()) {
         pullCloud(false);          // 既に共有ON：最新を取得
       }
@@ -501,7 +512,7 @@
       try {
         toast('共有を準備中…');
         const local = load(KEY, []);
-        const res = await fetch(cfg.cloudUrl, { method:'GET' });
+        const res = await fetch(cloudGetUrl(), { method:'GET' });
         const data = await res.json();
         const cloudItems = Array.isArray(data.items) ? data.items : [];
         const cloudIds = new Set(cloudItems.map(i => String(i.id)));
