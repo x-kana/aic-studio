@@ -74,7 +74,14 @@
       display: inline-block; font-size: 11.5px; font-weight: 700; border-radius: 999px;
       padding: 3px 9px; margin-top: 6px;
     }
-    .item .del { background: none; border: none; color: var(--line); font-size: 20px; cursor: pointer; padding: 6px; }
+    .item .qty-ctrl { display: flex; align-items: center; gap: 3px; flex: 0 0 auto; }
+    .item .qty-ctrl button {
+      width: 30px; height: 30px; border: 1px solid var(--line); background: #fff;
+      border-radius: 8px; font-size: 18px; line-height: 1; color: var(--teal); cursor: pointer; padding: 0;
+    }
+    .item .qty-ctrl button:active { background: var(--teal-soft); }
+    .item .qty-num { min-width: 20px; text-align: center; font-weight: 700; font-size: 15px; }
+    .item .del { background: none; border: none; color: #c9cdc8; font-size: 20px; cursor: pointer; padding: 4px 2px 4px 6px; }
     .item .del:hover { color: var(--red); }
 
     .lv-red { border-left-color: var(--red); }
@@ -299,10 +306,17 @@
       <div class="quick" id="quick-names"></div>
 
       <div class="row2">
-        <div>
-          <label>数量・メモ（任意）</label>
-          <input id="f-qty" placeholder="例：2パック" autocomplete="off">
+        <div style="flex:0 0 96px">
+          <label>個数</label>
+          <input id="f-num" type="number" inputmode="numeric" min="1" value="1">
         </div>
+        <div>
+          <label>メモ（任意）</label>
+          <input id="f-qty" placeholder="例：2パック・特売" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="row2">
         <div>
           <label>分類</label>
           <select id="f-cat">
@@ -533,12 +547,18 @@
         const dl = daysLeft(i.date);
         const lv = level(dl);
         const dateTxt = new Date(i.date+'T00:00:00').toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'});
+        const num = Number(i.num) || 1;
         return `<div class="item lv-${lv}">
           <div class="emoji">${i.cat}</div>
           <div class="body">
             <div class="name">${esc(i.name)}${i.qty?`<span class="meta"> ・ ${esc(i.qty)}</span>`:''}</div>
             <div class="meta">${dateTxt} まで</div>
             <span class="badge">${labelFor(dl)}</span>
+          </div>
+          <div class="qty-ctrl">
+            <button onclick="decItem('${i.id}')" aria-label="へらす">−</button>
+            <span class="qty-num">${num}</span>
+            <button onclick="incItem('${i.id}')" aria-label="ふやす">＋</button>
           </div>
           <button class="del" onclick="delItem('${i.id}')" aria-label="削除">×</button>
         </div>`;
@@ -553,17 +573,20 @@
       const date = document.getElementById('f-date').value;
       if (!name) { alert('食材の名前を入れてください'); return; }
       if (!date) { alert('賞味期限を選んでください'); return; }
+      const n = Math.max(1, parseInt(document.getElementById('f-num').value, 10) || 1);
       const item = {
         id: Date.now()+''+Math.floor(Math.random()*999),
         name,
         qty: document.getElementById('f-qty').value.trim(),
         cat: document.getElementById('f-cat').value,
-        date
+        date,
+        num: n
       };
       closeSheet();
       await addItems([item]);
     }
     async function addItems(list) {
+      list = list.map(it => ({ num: 1, ...it }));
       if (loggedIn()) {
         try { toast('保存中…'); await pushCloud({ action:'add', items:list }); render(); toast('保存しました'); }
         catch (e) { toast('保存に失敗（通信を確認）', false); }
@@ -572,11 +595,40 @@
       }
     }
     async function delItem(id) {
+      const it = items.find(i => i.id === id);
+      if (!confirm(`「${it ? it.name : 'この食材'}」を削除しますか？`)) return;
+      await removeItem(id);
+    }
+    async function removeItem(id) {
       if (loggedIn()) {
         try { toast('削除中…'); await pushCloud({ action:'delete', id }); render(); }
         catch (e) { toast('削除に失敗（通信を確認）', false); }
       } else {
         items = items.filter(i => i.id !== id); save(KEY, items); render();
+      }
+    }
+    // 個数の増減（消費のたびに −）
+    async function incItem(id) { await setNum(id, (numOf(id) + 1)); }
+    async function decItem(id) {
+      const cur = numOf(id);
+      if (cur <= 1) {
+        const it = items.find(i => i.id === id);
+        if (!confirm(`「${it ? it.name : 'この食材'}」を使い切りました。リストから消しますか？`)) return;
+        await removeItem(id);
+      } else {
+        await setNum(id, cur - 1);
+      }
+    }
+    function numOf(id) { const it = items.find(i => i.id === id); return Math.max(1, Number(it && it.num) || 1); }
+    async function setNum(id, n) {
+      if (loggedIn()) {
+        // 楽観更新（先に画面へ反映してから保存）
+        const it = items.find(i => i.id === id); if (it) it.num = n;
+        render();
+        try { await pushCloud({ action:'update', id, num: n }); }
+        catch (e) { toast('変更に失敗（通信を確認）', false); pullCloud(true); }
+      } else {
+        const it = items.find(i => i.id === id); if (it) { it.num = n; save(KEY, items); render(); }
       }
     }
 
@@ -606,6 +658,7 @@
       if (which === 'add') {
         document.getElementById('f-name').value = '';
         document.getElementById('f-qty').value = '';
+        document.getElementById('f-num').value = '1';
         document.getElementById('f-date').value = '';
         document.getElementById('f-cat').value = '🥬';
         document.getElementById('photo-status').innerHTML = '';
