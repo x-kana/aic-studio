@@ -196,26 +196,42 @@
   </style>
 </head>
 <body>
-  <!-- ログイン画面 -->
+  <!-- ログイン / 新規登録 画面 -->
   <div id="login">
     <div class="login-card">
       <div class="login-logo">🌿</div>
       <h1>冷蔵庫メモ</h1>
-      <p class="login-sub">家族の冷蔵庫にログイン</p>
 
-      <label>アドレス</label>
-      <input id="lg-addr" type="url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/…/exec">
+      <!-- ログイン -->
+      <div id="form-login">
+        <p class="login-sub">ログイン</p>
+        <label>メールアドレス</label>
+        <input id="li-email" type="email" inputmode="email" autocomplete="username" placeholder="you@example.com">
+        <label>パスワード</label>
+        <input id="li-pass" type="password" autocomplete="current-password" placeholder="パスワード">
+        <div id="li-msg"></div>
+        <button class="btn btn-add" style="width:100%;margin-top:18px" onclick="login()">ログイン</button>
+        <button class="login-link" onclick="authMode('register')">アカウントを作る（新規登録）</button>
+      </div>
 
-      <label>パスワード（合言葉）</label>
-      <input id="lg-pass" type="text" autocomplete="off" placeholder="家族の合言葉">
-
-      <div id="lg-msg"></div>
-      <button class="btn btn-add" style="width:100%;margin-top:18px" onclick="doLogin()">ログイン</button>
-      <button class="login-link" onclick="useLocal()">共有しない（この端末だけで使う）</button>
-      <p class="login-help">
-        「アドレス」は家族で共有する保管庫のURL（管理者からもらってください）。<br>
-        <b>同じアドレス＋同じパスワード</b>の人が、同じ冷蔵庫になります。別の家族は別のパスワードに。
-      </p>
+      <!-- 新規登録 -->
+      <div id="form-register" style="display:none">
+        <p class="login-sub">新規登録</p>
+        <label>おなまえ</label>
+        <input id="rg-name" autocomplete="name" placeholder="例：たろう">
+        <label>メールアドレス</label>
+        <input id="rg-email" type="email" inputmode="email" autocomplete="username" placeholder="you@example.com">
+        <label>パスワード</label>
+        <input id="rg-pass" type="password" autocomplete="new-password" placeholder="6文字以上">
+        <label>家族の合言葉</label>
+        <input id="rg-house" autocomplete="off" placeholder="例：tanaka2026">
+        <p class="login-help" style="margin:6px 0 0; text-align:left">
+          家族みんなで<b>同じ合言葉</b>を入れると同じ冷蔵庫になります。<br>初めての言葉なら新しい冷蔵庫が作られます。
+        </p>
+        <div id="rg-msg"></div>
+        <button class="btn btn-add" style="width:100%;margin-top:18px" onclick="register()">登録する</button>
+        <button class="login-link" onclick="authMode('login')">ログインに戻る</button>
+      </div>
     </div>
   </div>
 
@@ -325,24 +341,26 @@
 
       <button class="btn btn-add" onclick="saveSettings()">保存</button>
       <p class="help" style="margin-top:18px">
-        共有OFFのときは、登録データはこの端末のブラウザに保存されます（アプリ削除やデータ消去で消えます）。
+        食材データはアカウント（家族の合言葉）ごとにクラウド保存されます。同じ合言葉の家族で共有され、機種変しても残ります。
       </p>
     </div>
   </div>
 
   <script>
     // ---------- データ ----------
+    // 保管庫（会員情報＋食材データ）のアドレス。利用者は触りません。
+    const API = 'https://script.google.com/macros/s/AKfycbz9f91Usij8RCgyrUtBuLFM9hu8qRwgtEL3OK6pt_9w9ddNRALCbFf0J0ZwdpJO5AtXqQ/exec';
     const KEY = 'fridge.items.v1';
     const CFG = 'fridge.config.v1';
+    const AUTH = 'fridge.auth.v1';
     let items = load(KEY, []);
-    let cfg = load(CFG, { apiKey: '', model: 'claude-opus-4-8', warnDays: 3, cloudUrl: '', groupCode: '', localOnly: false });
+    let cfg = load(CFG, { apiKey: '', model: 'claude-opus-4-8', warnDays: 3 });
+    let auth = load(AUTH, {});                 // { token, email, name, household }
     let filter = 'all';
-    const grp = () => ((cfg.groupCode || 'default').trim() || 'default');           // 家族コード（合言葉）
-    const cloudGetUrl = () => cfg.cloudUrl + (cfg.cloudUrl.includes('?') ? '&' : '?') + 'group=' + encodeURIComponent(grp());
 
     function load(k, def) { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } }
     function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
-    const cloudOn = () => !!(cfg.cloudUrl && /^https:\/\/script\.google\.com\//.test(cfg.cloudUrl));
+    const loggedIn = () => !!auth.token;
 
     // 画面下に短いメッセージ
     let toastT;
@@ -353,32 +371,46 @@
       clearTimeout(toastT); toastT = setTimeout(()=>{ t.className=''; }, 2200);
     }
 
-    // クラウド（Googleスプレッドシート/GAS）から全件取得
-    async function pullCloud(silent) {
-      if (!cloudOn()) return;
-      try {
-        if (!silent) toast('読み込み中…');
-        const res = await fetch(cloudGetUrl(), { method:'GET' });
-        const data = await res.json();
-        items = Array.isArray(data.items) ? data.items : [];
-        save(KEY, items); // オフライン用キャッシュ
-        render();
-        if (!silent) toast('最新に更新しました');
-      } catch (e) {
-        if (!silent) toast('クラウドに接続できません（オフライン表示）', false);
-      }
-    }
-    // クラウドへ更新を送る（成功すると最新の全件が返る）
-    async function pushCloud(body) {
-      body.group = grp();
-      const res = await fetch(cfg.cloudUrl, {
+    // 保管庫へ送信（text/plainでpreflight回避）。{ok, error, items, token...} を返す
+    async function api(body) {
+      const res = await fetch(API, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // preflight回避
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(body)
       });
-      const data = await res.json();
-      if (Array.isArray(data.items)) { items = data.items; save(KEY, items); }
+      return res.json();
+    }
+
+    // 自分の家族の食材を取得
+    async function pullCloud(silent) {
+      if (!loggedIn()) return;
+      try {
+        if (!silent) toast('読み込み中…');
+        const res = await fetch(API + '?action=list&token=' + encodeURIComponent(auth.token), { method:'GET' });
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.items)) {
+          items = data.items; save(KEY, items); render();
+          if (!silent) toast('最新に更新しました');
+        } else if (data.ok === false) {
+          handleAuthError(data.error);
+        }
+      } catch (e) {
+        if (!silent) toast('接続できません（オフライン表示）', false);
+      }
+    }
+    // 追加・削除（成功すると最新の全件が返る）
+    async function pushCloud(body) {
+      body.token = auth.token;
+      const data = await api(body);
+      if (data.ok && Array.isArray(data.items)) { items = data.items; save(KEY, items); }
+      else if (data.ok === false) { handleAuthError(data.error); throw new Error(data.error); }
       return data;
+    }
+    // トークン切れなどはログイン画面へ戻す
+    function handleAuthError(msg) {
+      auth = {}; save(AUTH, auth); items = []; save(KEY, items);
+      toast(msg || 'もう一度ログインしてください', false);
+      render(); showLogin();
     }
 
     // ---------- 期限計算 ----------
@@ -459,7 +491,7 @@
       await addItems([item]);
     }
     async function addItems(list) {
-      if (cloudOn()) {
+      if (loggedIn()) {
         try { toast('保存中…'); await pushCloud({ action:'add', items:list }); render(); toast('保存しました'); }
         catch (e) { toast('保存に失敗（通信を確認）', false); }
       } else {
@@ -467,7 +499,7 @@
       }
     }
     async function delItem(id) {
-      if (cloudOn()) {
+      if (loggedIn()) {
         try { toast('削除中…'); await pushCloud({ action:'delete', id }); render(); }
         catch (e) { toast('削除に失敗（通信を確認）', false); }
       } else {
@@ -510,12 +542,11 @@
         document.getElementById('f-model').value = cfg.model;
         document.getElementById('f-warn').value = cfg.warnDays;
         const st = document.getElementById('login-state');
-        if (cloudOn()) {
-          st.innerHTML = `<div class="login-state-ok">ログイン中（合言葉：${esc(cfg.groupCode||'default')}）</div>`
-            + `<button class="login-link" style="text-align:left;padding-left:0" onclick="logout()">ログアウト／別の冷蔵庫に切り替える</button>`;
+        if (loggedIn()) {
+          st.innerHTML = `<div class="login-state-ok">ログイン中：${esc(auth.name||auth.email)}（合言葉：${esc(auth.household||'')}）</div>`
+            + `<button class="login-link" style="text-align:left;padding-left:0" onclick="logout()">ログアウト</button>`;
         } else {
-          st.innerHTML = `<p class="help" style="margin-top:4px">いまは「この端末だけ」で保存中です。</p>`
-            + `<button class="login-link" style="text-align:left;padding-left:0" onclick="closeSheet();showLogin()">家族と共有する（ログイン）</button>`;
+          st.innerHTML = `<button class="login-link" style="text-align:left;padding-left:0" onclick="closeSheet();showLogin()">ログイン</button>`;
         }
       }
       if (which === 'cook') {
@@ -536,51 +567,60 @@
       render();
     }
 
-    // ---------- ログイン（アドレス＋パスワード）----------
-    function showLogin() {
-      document.getElementById('lg-addr').value = cfg.cloudUrl || '';
-      document.getElementById('lg-pass').value = cfg.groupCode || '';
-      document.getElementById('lg-msg').innerHTML = '';
-      document.getElementById('login').classList.add('show');
-    }
+    // ---------- 会員登録・ログイン ----------
+    function showLogin() { authMode('login'); document.getElementById('login').classList.add('show'); }
     function hideLogin() { document.getElementById('login').classList.remove('show'); }
-
-    async function doLogin() {
-      const addr = document.getElementById('lg-addr').value.trim();
-      const pass = document.getElementById('lg-pass').value.trim();
-      const msg = document.getElementById('lg-msg');
-      if (!/^https:\/\/script\.google\.com\//.test(addr)) {
-        msg.innerHTML = `<div class="photo-err">アドレスは https://script.google.com/… で始まるURLです。コピーし直してください。</div>`;
-        return;
-      }
-      if (!pass) { msg.innerHTML = `<div class="photo-err">パスワード（合言葉）を入れてください。</div>`; return; }
-      cfg.cloudUrl = addr; cfg.groupCode = pass; cfg.localOnly = false; save(CFG, cfg);
-      msg.innerHTML = `<div class="photo-loading"><div class="spinner"></div>接続しています…</div>`;
-      try {
-        const res = await fetch(cloudGetUrl(), { method:'GET' });
-        const data = await res.json();
-        const cloudItems = Array.isArray(data.items) ? data.items : [];
-        const local = load(KEY, []);
-        const cloudIds = new Set(cloudItems.map(i => String(i.id)));
-        const toUpload = local.filter(i => !cloudIds.has(String(i.id)));   // この端末の既存データをクラウドへ引き継ぎ
-        if (toUpload.length) await pushCloud({ action:'add', items: toUpload });
-        else { items = cloudItems; save(KEY, items); }
-        hideLogin(); render(); toast('ログインしました');
-      } catch (e) {
-        cfg.cloudUrl = ''; cfg.groupCode = ''; save(CFG, cfg);   // 失敗：中途半端な状態を残さない
-        msg.innerHTML = `<div class="photo-err">接続できませんでした。アドレスが正しいか確認してください。</div>`;
-      }
+    function authMode(m) {
+      document.getElementById('form-login').style.display = (m==='login') ? 'block' : 'none';
+      document.getElementById('form-register').style.display = (m==='register') ? 'block' : 'none';
+      document.getElementById('li-msg').innerHTML = '';
+      document.getElementById('rg-msg').innerHTML = '';
     }
-    function useLocal() {
-      cfg.cloudUrl = ''; cfg.groupCode = ''; cfg.localOnly = true; save(CFG, cfg);
-      items = load(KEY, []); hideLogin(); render();
+    const isEmail = s => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+
+    async function register() {
+      const name = document.getElementById('rg-name').value.trim();
+      const email = document.getElementById('rg-email').value.trim();
+      const pass = document.getElementById('rg-pass').value;
+      const house = document.getElementById('rg-house').value.trim();
+      const msg = document.getElementById('rg-msg');
+      if (!isEmail(email)) { msg.innerHTML = err('メールアドレスを正しく入れてください。'); return; }
+      if (pass.length < 6) { msg.innerHTML = err('パスワードは6文字以上にしてください。'); return; }
+      if (!house) { msg.innerHTML = err('家族の合言葉を入れてください。'); return; }
+      msg.innerHTML = loadingBox('登録しています…');
+      try {
+        const data = await api({ action:'register', email, pass, name, household: house });
+        if (!data.ok) { msg.innerHTML = err(data.error || '登録できませんでした。'); return; }
+        finishAuth(data, '登録しました');
+      } catch (e) { msg.innerHTML = err('接続できませんでした。通信を確認してください。'); }
+    }
+    async function login() {
+      const email = document.getElementById('li-email').value.trim();
+      const pass = document.getElementById('li-pass').value;
+      const msg = document.getElementById('li-msg');
+      if (!email || !pass) { msg.innerHTML = err('メールアドレスとパスワードを入れてください。'); return; }
+      msg.innerHTML = loadingBox('ログインしています…');
+      try {
+        const data = await api({ action:'login', email, pass });
+        if (!data.ok) { msg.innerHTML = err(data.error || 'ログインできませんでした。'); return; }
+        finishAuth(data, 'ログインしました');
+      } catch (e) { msg.innerHTML = err('接続できませんでした。通信を確認してください。'); }
+    }
+    function finishAuth(data, okMsg) {
+      auth = { token: data.token, email: data.email, name: data.name, household: data.household };
+      save(AUTH, auth);
+      items = Array.isArray(data.items) ? data.items : [];
+      save(KEY, items);
+      hideLogin(); render(); toast(okMsg);
     }
     function logout() {
-      if (!confirm('ログアウトしますか？\nこの端末の表示は消えますが、クラウド側のデータは残ります。')) return;
-      cfg.cloudUrl = ''; cfg.groupCode = ''; cfg.localOnly = false; save(CFG, cfg);
+      if (!confirm('ログアウトしますか？\n登録した食材はクラウドに残るので、次にログインすればまた見られます。')) return;
+      auth = {}; save(AUTH, auth);
       items = []; save(KEY, items);
       closeSheet(); render(); showLogin();
     }
+    const err = m => `<div class="photo-err">${m}</div>`;
+    const loadingBox = m => `<div class="photo-loading"><div class="spinner"></div>${m}</div>`;
 
     // ---------- AIレシピ ----------
     async function suggestRecipes() {
@@ -798,13 +838,13 @@ ${listText}
     // ---------- 起動 ----------
     buildQuick();
     render();
-    if (cloudOn()) {
+    if (loggedIn()) {
       pullCloud(true);            // ログイン済み：最新を取得
-    } else if (!cfg.localOnly) {
+    } else {
       showLogin();                // 未ログイン：ログイン画面を出す
     }
     document.addEventListener('visibilitychange', () => {  // アプリに戻るたび最新化
-      if (!document.hidden && cloudOn()) pullCloud(true);
+      if (!document.hidden && loggedIn()) pullCloud(true);
     });
   </script>
 </body>
