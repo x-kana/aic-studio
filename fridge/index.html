@@ -141,6 +141,15 @@
     .photo-loading .spinner { width: 18px; height: 18px; border-width: 2px; margin: 0; }
     .photo-ok { background: var(--green-soft); color: var(--green); border-radius: 10px; padding: 10px 12px; font-size: 12.5px; margin-top: 8px; }
     .photo-err { background: var(--red-soft); color: var(--red); border-radius: 10px; padding: 10px 12px; font-size: 12.5px; margin-top: 8px; }
+    .manual-head { text-align: center; color: var(--sub); font-size: 12px; margin: 20px 0 2px; }
+    .rev-head { font-size: 12.5px; font-weight: 700; color: var(--sub); margin: 14px 0 8px; }
+    .rev-row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+    .rev-row select { width: 56px; padding: 11px 2px; font-size: 18px; text-align: center; }
+    .rev-row input[type=date] { width: 130px; padding: 11px 8px; font-size: 13px; }
+    .rev-row input.rev-name { flex: 1; min-width: 0; padding: 11px; font-size: 14px; }
+    .rev-del { background: none; border: none; color: #c9cdc8; font-size: 20px; cursor: pointer; padding: 4px 4px; }
+    .rev-del:active { color: var(--red); }
+    #photo-review .btn-add { width: 100%; margin-top: 8px; }
     .help { font-size: 12px; color: var(--sub); margin-top: 8px; line-height: 1.7; }
     .help a { color: var(--teal); }
 
@@ -185,10 +194,12 @@
       <div class="grab"></div>
       <h2>食材を追加</h2>
 
-      <button class="btn-photo" onclick="document.getElementById('f-photo').click()">📷 写真で読み取る</button>
+      <button class="btn-photo" onclick="document.getElementById('f-photo').click()">📷 写真でまとめて読み取る</button>
       <input id="f-photo" type="file" accept="image/*" capture="environment" hidden onchange="readPhoto(event)">
       <div id="photo-status"></div>
+      <div id="photo-review"></div>
 
+      <div class="manual-head">― または手で1つ入力 ―</div>
       <label>食材の名前</label>
       <input id="f-name" placeholder="例：とり胸肉、牛乳、ほうれん草" autocomplete="off">
       <div class="quick" id="quick-names"></div>
@@ -389,6 +400,8 @@
         document.getElementById('f-date').value = '';
         document.getElementById('f-cat').value = '🥬';
         document.getElementById('photo-status').innerHTML = '';
+        document.getElementById('photo-review').innerHTML = '';
+        reviewItems = [];
       }
       if (which === 'settings') {
         document.getElementById('f-key').value = cfg.apiKey || '';
@@ -500,12 +513,16 @@ ${listText}
         </div>`).join('');
     }
 
-    // ---------- 写真で読み取り（画像認識） ----------
+    // ---------- 写真でまとめて読み取り（画像認識） ----------
+    let reviewItems = [];
+    const CATS = ['🥬','🍖','🐟','🥛','🍱','🧊','🫙'];
+
     async function readPhoto(ev) {
       const file = ev.target.files && ev.target.files[0];
       ev.target.value = ''; // 同じ写真を再選択できるように
       if (!file) return;
       const status = document.getElementById('photo-status');
+      document.getElementById('photo-review').innerHTML = '';
       if (!cfg.apiKey) {
         status.innerHTML = `<div class="photo-err">写真の読み取りにもAPIキーが必要です。右上⚙️から登録してください。</div>`;
         return;
@@ -514,12 +531,13 @@ ${listText}
       try {
         const { data, media } = await shrinkImage(file);
         const today = new Date().toISOString().slice(0,10);
-        const prompt = `この写真は食品か、その賞味期限／消費期限のラベルです。読み取って次のJSONだけを返してください（説明文や記号は付けない）。
+        const prompt = `この写真には食品が1つ以上写っています（複数並んでいることもあります）。写っている食品を1つずつ、すべて読み取って次のJSONだけを返してください（説明文やマークダウン記号は付けない）。
 今日は ${today} です。
-- name: 食品名（短く。読めなければ写真から推測。例「牛乳」「とり胸肉」）
-- date: 賞味期限または消費期限を YYYY-MM-DD で。年が書かれていなければ今日以降で最も近い日付として補完。日付が全く読めなければ空文字 ""。
+各食品について：
+- name: 食品名（短く。文字が読めなければ見た目から推測。例「牛乳」「とり胸肉」）
+- date: 賞味期限または消費期限を YYYY-MM-DD で。年が書かれていなければ今日以降で最も近い日付に補完。読めなければ空文字 ""。
 - cat: 次から1つの絵文字 🥬(野菜) 🍖(肉) 🐟(魚) 🥛(乳卵) 🍱(惣菜) 🧊(冷凍) 🫙(調味料その他)
-出力例: {"name":"牛乳","date":"2026-06-20","cat":"🥛"}`;
+出力例: {"items":[{"name":"牛乳","date":"2026-06-20","cat":"🥛"},{"name":"とり胸肉","date":"2026-06-16","cat":"🍖"}]}`;
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
@@ -530,7 +548,7 @@ ${listText}
           },
           body: JSON.stringify({
             model: cfg.model,
-            max_tokens: 400,
+            max_tokens: 1024,
             messages: [{ role: 'user', content: [
               { type: 'image', source: { type: 'base64', media_type: media, data } },
               { type: 'text', text: prompt }
@@ -547,34 +565,74 @@ ${listText}
         const out = await res.json();
         const text = (out.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
         const m = text.match(/\{[\s\S]*\}/);
-        const r = JSON.parse(m ? m[0] : text);
-        if (r.name) document.getElementById('f-name').value = r.name;
-        if (r.cat) document.getElementById('f-cat').value = r.cat;
-        if (r.date) document.getElementById('f-date').value = r.date;
-        if (r.date) {
-          status.innerHTML = `<div class="photo-ok">読み取り完了：${esc(r.name||'')} ・ 期限 ${esc(r.date)}。内容を確認して登録してください。</div>`;
-        } else {
-          status.innerHTML = `<div class="photo-err">期限の日付が読み取れませんでした。明るく・大きめに撮るか、手入力してください。</div>`;
+        const parsed = JSON.parse(m ? m[0] : text);
+        const found = (parsed.items||[]).filter(x => x && (x.name || x.date));
+        if (!found.length) {
+          status.innerHTML = `<div class="photo-err">食品を読み取れませんでした。明るく・重ならないように撮り直すか、下の欄に手入力してください。</div>`;
+          return;
         }
+        reviewItems = found.map(x => ({
+          name: x.name || '',
+          date: x.date || '',
+          cat: CATS.includes(x.cat) ? x.cat : '🫙'
+        }));
+        status.innerHTML = `<div class="photo-ok">${reviewItems.length}件 読み取りました。確認・修正して「まとめて登録」を押してください。</div>`;
+        renderReview();
       } catch (e) {
         status.innerHTML = `<div class="photo-err">読み取りに失敗しました。もう一度撮影するか、手入力してください。</div>`;
       }
     }
 
-    // 写真をcanvasで縮小してbase64化（通信量とAI料金を抑える）
+    function renderReview() {
+      const box = document.getElementById('photo-review');
+      if (!reviewItems.length) { box.innerHTML = ''; return; }
+      box.innerHTML = `<div class="rev-head">読み取り結果（${reviewItems.length}件）</div>` +
+        reviewItems.map((it,i) => `
+          <div class="rev-row">
+            <select onchange="updateReview(${i},'cat',this.value)">
+              ${CATS.map(c=>`<option value="${c}" ${c===it.cat?'selected':''}>${c}</option>`).join('')}
+            </select>
+            <input class="rev-name" value="${esc(it.name)}" placeholder="食材名" oninput="updateReview(${i},'name',this.value)">
+            <input type="date" value="${esc(it.date)}" oninput="updateReview(${i},'date',this.value)">
+            <button class="rev-del" onclick="removeReview(${i})" aria-label="削除">×</button>
+          </div>`).join('') +
+        `<button class="btn btn-add" onclick="registerAll()">この${reviewItems.length}件をまとめて登録</button>`;
+    }
+    function updateReview(i, key, val) { if (reviewItems[i]) reviewItems[i][key] = val; }
+    function removeReview(i) {
+      reviewItems.splice(i,1);
+      renderReview();
+      if (!reviewItems.length) document.getElementById('photo-status').innerHTML = '';
+    }
+    function registerAll() {
+      const ready = reviewItems.filter(it => it.name.trim() && it.date);
+      if (!ready.length) { alert('登録できる行がありません。名前と期限の両方が必要です。'); return; }
+      const missing = reviewItems.length - ready.length;
+      ready.forEach((it, idx) => items.push({
+        id: Date.now()+'-'+idx+'-'+Math.floor(Math.random()*999),
+        name: it.name.trim(), qty: '', cat: it.cat, date: it.date
+      }));
+      save(KEY, items);
+      reviewItems = [];
+      closeSheet();
+      render();
+      if (missing) setTimeout(()=>alert(`${ready.length}件を登録しました。${missing}件は名前か期限が空のため登録していません。`), 150);
+    }
+
+    // 写真をcanvasで縮小してbase64化（通信量とAI料金を抑える。複数読み取り用にやや高解像度）
     function shrinkImage(file) {
       return new Promise((resolve, reject) => {
         const img = new Image();
         const url = URL.createObjectURL(file);
         img.onload = () => {
           URL.revokeObjectURL(url);
-          const max = 1400;
+          const max = 1800;
           let { width:w, height:h } = img;
           if (w > max || h > max) { const s = max/Math.max(w,h); w=Math.round(w*s); h=Math.round(h*s); }
           const c = document.createElement('canvas');
           c.width = w; c.height = h;
           c.getContext('2d').drawImage(img, 0, 0, w, h);
-          const dataUrl = c.toDataURL('image/jpeg', 0.8);
+          const dataUrl = c.toDataURL('image/jpeg', 0.82);
           resolve({ data: dataUrl.split(',')[1], media: 'image/jpeg' });
         };
         img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
