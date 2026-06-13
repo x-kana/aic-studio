@@ -150,6 +150,14 @@
     .rev-del { background: none; border: none; color: #c9cdc8; font-size: 20px; cursor: pointer; padding: 4px 4px; }
     .rev-del:active { color: var(--red); }
     #photo-review .btn-add { width: 100%; margin-top: 8px; }
+    #toast {
+      position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%) translateY(20px);
+      background: #1c2421; color: #fff; padding: 10px 16px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none;
+      transition: .25s; z-index: 60; white-space: nowrap; max-width: 90vw;
+    }
+    #toast.show { opacity: .96; transform: translateX(-50%) translateY(0); }
+    #toast.err2 { background: var(--red); }
     .help { font-size: 12px; color: var(--sub); margin-top: 8px; line-height: 1.7; }
     .help a { color: var(--teal); }
 
@@ -271,9 +279,17 @@
         <option value="7">7日前</option>
       </select>
 
+      <label>👨‍👩‍👧 家族で共有（クラウド保存）</label>
+      <input id="f-cloud" type="url" placeholder="https://script.google.com/…/exec" autocomplete="off">
+      <p class="help">
+        ここにURLを入れると、<b>家族みんなで1つの冷蔵庫を共有</b>でき、機種変しても残ります。<br>
+        <b>空欄ならこの端末の中だけ</b>に保存（今まで通り）。<br>
+        URLの作り方は同じフォルダの「クラウド保存の作り方」を参照。今の端末のデータは、共有をオンにすると自動でクラウドへ引き継がれます。
+      </p>
+
       <button class="btn btn-add" onclick="saveSettings()">保存</button>
       <p class="help" style="margin-top:18px">
-        登録データはこの端末のブラウザに保存されます。アプリの削除やデータ消去で消えます。
+        共有OFFのときは、登録データはこの端末のブラウザに保存されます（アプリ削除やデータ消去で消えます）。
       </p>
     </div>
   </div>
@@ -283,11 +299,48 @@
     const KEY = 'fridge.items.v1';
     const CFG = 'fridge.config.v1';
     let items = load(KEY, []);
-    let cfg = load(CFG, { apiKey: '', model: 'claude-opus-4-8', warnDays: 3 });
+    let cfg = load(CFG, { apiKey: '', model: 'claude-opus-4-8', warnDays: 3, cloudUrl: '' });
     let filter = 'all';
 
     function load(k, def) { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } }
     function save(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+    const cloudOn = () => !!(cfg.cloudUrl && /^https:\/\/script\.google\.com\//.test(cfg.cloudUrl));
+
+    // 画面下に短いメッセージ
+    let toastT;
+    function toast(msg, ok=true) {
+      let t = document.getElementById('toast');
+      if (!t) { t = document.createElement('div'); t.id='toast'; document.body.appendChild(t); }
+      t.textContent = msg; t.className = ok ? 'show' : 'show err2';
+      clearTimeout(toastT); toastT = setTimeout(()=>{ t.className=''; }, 2200);
+    }
+
+    // クラウド（Googleスプレッドシート/GAS）から全件取得
+    async function pullCloud(silent) {
+      if (!cloudOn()) return;
+      try {
+        if (!silent) toast('読み込み中…');
+        const res = await fetch(cfg.cloudUrl, { method:'GET' });
+        const data = await res.json();
+        items = Array.isArray(data.items) ? data.items : [];
+        save(KEY, items); // オフライン用キャッシュ
+        render();
+        if (!silent) toast('最新に更新しました');
+      } catch (e) {
+        if (!silent) toast('クラウドに接続できません（オフライン表示）', false);
+      }
+    }
+    // クラウドへ更新を送る（成功すると最新の全件が返る）
+    async function pushCloud(body) {
+      const res = await fetch(cfg.cloudUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // preflight回避
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (Array.isArray(data.items)) { items = data.items; save(KEY, items); }
+      return data;
+    }
 
     // ---------- 期限計算 ----------
     function daysLeft(dateStr) {
@@ -350,27 +403,37 @@
     function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
     function setFilter(c){ filter=c; render(); }
 
-    // ---------- 追加・削除 ----------
-    function saveItem() {
+    // ---------- 追加・削除（クラウドONなら共有先へ、OFFなら端末内へ）----------
+    async function saveItem() {
       const name = document.getElementById('f-name').value.trim();
       const date = document.getElementById('f-date').value;
       if (!name) { alert('食材の名前を入れてください'); return; }
       if (!date) { alert('賞味期限を選んでください'); return; }
-      items.push({
+      const item = {
         id: Date.now()+''+Math.floor(Math.random()*999),
         name,
         qty: document.getElementById('f-qty').value.trim(),
         cat: document.getElementById('f-cat').value,
         date
-      });
-      save(KEY, items);
+      };
       closeSheet();
-      render();
+      await addItems([item]);
     }
-    function delItem(id) {
-      items = items.filter(i => i.id !== id);
-      save(KEY, items);
-      render();
+    async function addItems(list) {
+      if (cloudOn()) {
+        try { toast('保存中…'); await pushCloud({ action:'add', items:list }); render(); toast('保存しました'); }
+        catch (e) { toast('保存に失敗（通信を確認）', false); }
+      } else {
+        items.push(...list); save(KEY, items); render();
+      }
+    }
+    async function delItem(id) {
+      if (cloudOn()) {
+        try { toast('削除中…'); await pushCloud({ action:'delete', id }); render(); }
+        catch (e) { toast('削除に失敗（通信を確認）', false); }
+      } else {
+        items = items.filter(i => i.id !== id); save(KEY, items); render();
+      }
     }
 
     // ---------- クイック入力 ----------
@@ -407,6 +470,7 @@
         document.getElementById('f-key').value = cfg.apiKey || '';
         document.getElementById('f-model').value = cfg.model;
         document.getElementById('f-warn').value = cfg.warnDays;
+        document.getElementById('f-cloud').value = cfg.cloudUrl || '';
       }
       if (which === 'cook') {
         document.getElementById('cook-content').innerHTML = '';
@@ -417,13 +481,38 @@
     function closeSheet() {
       document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open'));
     }
-    function saveSettings() {
+    async function saveSettings() {
+      const prevCloud = cfg.cloudUrl;
       cfg.apiKey = document.getElementById('f-key').value.trim();
       cfg.model = document.getElementById('f-model').value;
       cfg.warnDays = document.getElementById('f-warn').value;
+      cfg.cloudUrl = document.getElementById('f-cloud').value.trim();
       save(CFG, cfg);
       closeSheet();
       render();
+      if (cloudOn() && cfg.cloudUrl !== prevCloud) {
+        await firstSync();        // 共有を新たにON：端末のデータをクラウドへ引き継ぎ
+      } else if (cloudOn()) {
+        pullCloud(false);          // 既に共有ON：最新を取得
+      }
+    }
+    // 初回：この端末の既存データのうちクラウドに無いものをアップロードしてから最新を表示
+    async function firstSync() {
+      try {
+        toast('共有を準備中…');
+        const local = load(KEY, []);
+        const res = await fetch(cfg.cloudUrl, { method:'GET' });
+        const data = await res.json();
+        const cloudItems = Array.isArray(data.items) ? data.items : [];
+        const cloudIds = new Set(cloudItems.map(i => String(i.id)));
+        const toUpload = local.filter(i => !cloudIds.has(String(i.id)));
+        if (toUpload.length) await pushCloud({ action:'add', items: toUpload });
+        else { items = cloudItems; save(KEY, items); }
+        render();
+        toast('家族共有をオンにしました');
+      } catch (e) {
+        toast('クラウドに接続できません。URLを確認してください', false);
+      }
     }
 
     // ---------- AIレシピ ----------
@@ -604,18 +693,17 @@ ${listText}
       renderReview();
       if (!reviewItems.length) document.getElementById('photo-status').innerHTML = '';
     }
-    function registerAll() {
+    async function registerAll() {
       const ready = reviewItems.filter(it => it.name.trim() && it.date);
       if (!ready.length) { alert('登録できる行がありません。名前と期限の両方が必要です。'); return; }
       const missing = reviewItems.length - ready.length;
-      ready.forEach((it, idx) => items.push({
+      const list = ready.map((it, idx) => ({
         id: Date.now()+'-'+idx+'-'+Math.floor(Math.random()*999),
         name: it.name.trim(), qty: '', cat: it.cat, date: it.date
       }));
-      save(KEY, items);
       reviewItems = [];
       closeSheet();
-      render();
+      await addItems(list);
       if (missing) setTimeout(()=>alert(`${ready.length}件を登録しました。${missing}件は名前か期限が空のため登録していません。`), 150);
     }
 
@@ -643,6 +731,10 @@ ${listText}
     // ---------- 起動 ----------
     buildQuick();
     render();
+    if (cloudOn()) pullCloud(true);                       // 共有ONなら最新を取得
+    document.addEventListener('visibilitychange', () => {  // アプリに戻るたび最新化
+      if (!document.hidden && cloudOn()) pullCloud(true);
+    });
   </script>
 </body>
 </html>
