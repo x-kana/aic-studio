@@ -588,8 +588,9 @@
     async function addItems(list) {
       list = list.map(it => ({ num: 1, ...it }));
       if (loggedIn()) {
-        try { toast('保存中…'); await pushCloud({ action:'add', items:list }); render(); toast('保存しました'); }
-        catch (e) { toast('保存に失敗（通信を確認）', false); }
+        items.push(...list); render();                 // 先に画面へ反映
+        try { await pushCloud({ action:'add', items:list }); render(); }   // 裏で保存
+        catch (e) { toast('保存に失敗（通信を確認）', false); pullCloud(true); }
       } else {
         items.push(...list); save(KEY, items); render();
       }
@@ -601,8 +602,9 @@
     }
     async function removeItem(id) {
       if (loggedIn()) {
-        try { toast('削除中…'); await pushCloud({ action:'delete', id }); render(); }
-        catch (e) { toast('削除に失敗（通信を確認）', false); }
+        items = items.filter(i => i.id !== id); render();   // 先に画面から消す
+        try { await pushCloud({ action:'delete', id }); }   // 裏で保存
+        catch (e) { toast('削除に失敗（通信を確認）', false); pullCloud(true); }
       } else {
         items = items.filter(i => i.id !== id); save(KEY, items); render();
       }
