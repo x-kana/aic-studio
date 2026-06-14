@@ -610,28 +610,31 @@
       }
     }
     // 個数の増減（消費のたびに −）
-    async function incItem(id) { await setNum(id, (numOf(id) + 1)); }
-    async function decItem(id) {
+    function incItem(id) { setNum(id, numOf(id) + 1); }
+    function decItem(id) {
       const cur = numOf(id);
       if (cur <= 1) {
         const it = items.find(i => i.id === id);
         if (!confirm(`「${it ? it.name : 'この食材'}」を使い切りました。リストから消しますか？`)) return;
-        await removeItem(id);
+        removeItem(id);
       } else {
-        await setNum(id, cur - 1);
+        setNum(id, cur - 1);
       }
     }
     function numOf(id) { const it = items.find(i => i.id === id); return Math.max(1, Number(it && it.num) || 1); }
-    async function setNum(id, n) {
-      if (loggedIn()) {
-        // 楽観更新（先に画面へ反映してから保存）
-        const it = items.find(i => i.id === id); if (it) it.num = n;
-        render();
-        try { await pushCloud({ action:'update', id, num: n }); }
-        catch (e) { toast('変更に失敗（通信を確認）', false); pullCloud(true); }
-      } else {
-        const it = items.find(i => i.id === id); if (it) { it.num = n; save(KEY, items); render(); }
-      }
+    let numTimers = {};
+    function setNum(id, n) {
+      const it = items.find(i => i.id === id); if (!it) return;
+      it.num = n; render();                          // すぐ画面に反映（返事は待たない）
+      if (!loggedIn()) { save(KEY, items); return; }
+      clearTimeout(numTimers[id]);                   // 連打は0.6秒まとめて1回だけ保存
+      numTimers[id] = setTimeout(() => saveNum(id, it.num), 600);
+    }
+    async function saveNum(id, n) {
+      try {
+        const data = await api({ action:'update', token: auth.token, fridge: currentId, id, num: n });
+        if (data.ok === false && /ログイン/.test(data.error || '')) handleAuthError(data.error);
+      } catch (e) { toast('数の保存に失敗（通信を確認）', false); }
     }
 
     // ---------- クイック入力 ----------
