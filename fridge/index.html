@@ -90,6 +90,8 @@
     .lv-amber .badge { background: var(--amber-soft); color: var(--amber); }
     .lv-green { border-left-color: var(--green); }
     .lv-green .badge { background: var(--green-soft); color: var(--green); }
+    .lv-none { border-left-color: var(--line); }
+    .badge-none { background: #eef0ed; color: var(--sub); }
 
     .empty { text-align: center; color: var(--sub); padding: 48px 20px; font-size: 14px; }
     .empty .big { font-size: 40px; margin-bottom: 10px; }
@@ -331,7 +333,7 @@
         </div>
       </div>
 
-      <label>賞味期限</label>
+      <label>賞味期限（任意）</label>
       <input id="f-date" type="date">
       <div class="quick" id="quick-dates"></div>
 
@@ -536,7 +538,7 @@
       ).join('');
 
       // list (sorted by date)
-      const sorted = [...items].sort((a,b) => a.date.localeCompare(b.date));
+      const sorted = [...items].sort((a,b) => (a.date||'9999-99-99').localeCompare(b.date||'9999-99-99'));  // 期限なしは末尾
       const shown = sorted.filter(i => filter==='all' || i.cat===filter);
       const listEl = document.getElementById('list');
       if (shown.length === 0) {
@@ -544,16 +546,18 @@
         return;
       }
       listEl.innerHTML = shown.map(i => {
-        const dl = daysLeft(i.date);
-        const lv = level(dl);
-        const dateTxt = new Date(i.date+'T00:00:00').toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'});
         const num = Number(i.num) || 1;
+        const hasDate = !!i.date;
+        const dl = hasDate ? daysLeft(i.date) : null;
+        const lv = hasDate ? level(dl) : 'none';
+        const dateLine = hasDate ? `<div class="meta">${new Date(i.date+'T00:00:00').toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'})} まで</div>` : '';
+        const badge = hasDate ? `<span class="badge">${labelFor(dl)}</span>` : `<span class="badge badge-none">期限なし</span>`;
         return `<div class="item lv-${lv}">
           <div class="emoji">${i.cat}</div>
           <div class="body">
             <div class="name">${esc(i.name)}${i.qty?`<span class="meta"> ・ ${esc(i.qty)}</span>`:''}</div>
-            <div class="meta">${dateTxt} まで</div>
-            <span class="badge">${labelFor(dl)}</span>
+            ${dateLine}
+            ${badge}
           </div>
           <div class="qty-ctrl">
             <button onclick="decItem('${i.id}')" aria-label="へらす">−</button>
@@ -572,7 +576,6 @@
       const name = document.getElementById('f-name').value.trim();
       const date = document.getElementById('f-date').value;
       if (!name) { alert('食材の名前を入れてください'); return; }
-      if (!date) { alert('賞味期限を選んでください'); return; }
       const n = Math.max(1, parseInt(document.getElementById('f-num').value, 10) || 1);
       const item = {
         id: Date.now()+''+Math.floor(Math.random()*999),
@@ -846,10 +849,10 @@
       box.innerHTML = `<div class="loading"><div class="spinner"></div>AIが献立を考えています…</div>`;
 
       // 期限が近い順に最大10件を渡す
-      const sorted = [...items].sort((a,b)=>a.date.localeCompare(b.date)).slice(0,10);
+      const sorted = [...items].sort((a,b)=>(a.date||'9999-99-99').localeCompare(b.date||'9999-99-99')).slice(0,10);
       const listText = sorted.map(i => {
-        const dl = daysLeft(i.date);
-        return `- ${i.name}${i.qty?`（${i.qty}）`:''}：${labelFor(dl)}`;
+        const label = i.date ? labelFor(daysLeft(i.date)) : '期限不明';
+        return `- ${i.name}${i.qty?`（${i.qty}）`:''}：${label}`;
       }).join('\n');
 
       const prompt = `あなたは家庭料理が得意なシェフです。下の冷蔵庫の食材から、今日作れる料理を2〜3品提案してください。
@@ -1009,8 +1012,8 @@ ${listText}
       if (!reviewItems.length) document.getElementById('photo-status').innerHTML = '';
     }
     async function registerAll() {
-      const ready = reviewItems.filter(it => it.name.trim() && it.date);
-      if (!ready.length) { alert('登録できる行がありません。名前と期限の両方が必要です。'); return; }
+      const ready = reviewItems.filter(it => it.name.trim());
+      if (!ready.length) { alert('登録できる行がありません。食材名を入れてください。'); return; }
       const missing = reviewItems.length - ready.length;
       const list = ready.map((it, idx) => ({
         id: Date.now()+'-'+idx+'-'+Math.floor(Math.random()*999),
@@ -1019,7 +1022,7 @@ ${listText}
       reviewItems = [];
       closeSheet();
       await addItems(list);
-      if (missing) setTimeout(()=>alert(`${ready.length}件を登録しました。${missing}件は名前か期限が空のため登録していません。`), 150);
+      if (missing) setTimeout(()=>alert(`${ready.length}件を登録しました。${missing}件は食材名が空のため登録していません。`), 150);
     }
 
     // 写真をcanvasで縮小してbase64化（通信量とAI料金を抑える。複数読み取り用にやや高解像度）
