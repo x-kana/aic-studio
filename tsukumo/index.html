@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSUKUMO PARKOUR PARK｜座間の屋外パルクールパーク</title>
+<meta name="description" content="ツクモ パルクールパークは、座間市にある屋外パルクール施設。年中さんから大人まで、熟練コーチによる教室・オープンジム・JAMを開催。無料体験レッスン受付中。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#D9A13B;      /* チラシのゴールド */
+  --accent:#06C755;       /* LINEグリーン（CTA専用） */
+  --ink:#0D0F13;          /* 夜 */
+  --ink-2:#161A20;
+  --concrete:#E9E7E2;     /* 昼のコンクリート */
+  --concrete-2:#DBD9D3;
+  --steel:#878D94;        /* 単管シルバー */
+  --white:#FAFAF8;
+  --font-display:'Anton',sans-serif;
+  --font-body:'Noto Sans JP',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);color:var(--ink);background:var(--concrete);line-height:1.9;font-size:16px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
+
+/* ---------- 共通パーツ ---------- */
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+.eyebrow{display:flex;align-items:center;gap:12px;font-family:var(--font-display);font-size:14px;letter-spacing:.22em;color:var(--primary);text-transform:uppercase}
+/* 単管ジョイント（丸に十字）— セクションの目印 */
+.joint{width:16px;height:16px;flex:none;border:2px solid currentColor;border-radius:50%;position:relative}
+.joint::before,.joint::after{content:"";position:absolute;background:currentColor}
+.joint::before{left:50%;top:2px;bottom:2px;width:2px;transform:translateX(-50%)}
+.joint::after{top:50%;left:2px;right:2px;height:2px;transform:translateY(-50%)}
+h2{font-size:clamp(26px,4.2vw,40px);font-weight:900;line-height:1.45;letter-spacing:.02em;margin:14px 0 20px}
+.lead{max-width:38em}
+.section{padding:96px 0}
+.btn-line{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#fff;font-weight:700;font-size:17px;padding:16px 34px;border-radius:6px;transition:transform .2s,box-shadow .2s;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.btn-line:hover{transform:translateY(-2px);box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.btn-line svg{width:22px;height:22px;flex:none}
+.note{font-size:13px;color:var(--steel)}
+
+/* ---------- ヘッダー ---------- */
+header{position:absolute;inset:0 0 auto;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:20px 24px}
+.logo{font-family:var(--font-display);color:var(--white);font-size:20px;letter-spacing:.08em;line-height:1.2}
+.logo small{display:block;font-size:10px;letter-spacing:.34em;color:var(--primary)}
+.header-cta{font-weight:700;font-size:13px;color:var(--ink);background:var(--primary);padding:10px 18px;border-radius:4px}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;background:var(--ink);color:var(--white);overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:url(assets/hero.jpg) center 30%/cover no-repeat;opacity:.85}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,15,19,.55) 0%,rgba(13,15,19,.05) 45%,rgba(13,15,19,.88) 100%)}
+.hero-inner{position:relative;z-index:2;width:100%;padding:0 24px 72px}
+.hero-copy{max-width:1100px;margin:0 auto}
+.hero h1{font-weight:900;font-size:clamp(38px,7.5vw,76px);line-height:1.3;letter-spacing:.04em;text-shadow:0 2px 24px rgba(0,0,0,.5)}
+.hero h1 .en{display:block;font-family:var(--font-display);font-weight:400;font-size:clamp(15px,2vw,22px);letter-spacing:.3em;color:var(--primary);margin-bottom:10px;text-shadow:0 1px 10px rgba(0,0,0,.85)}
+.hero h1 .nb{display:inline-block}
+.hero p{margin-top:18px;max-width:34em;font-size:clamp(14px,1.6vw,17px);text-shadow:0 1px 12px rgba(0,0,0,.6)}
+.hero-actions{margin-top:30px;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.hero-sub{font-size:13px;color:rgba(250,250,248,.75)}
+/* 跳躍の軌道ライン */
+.traj{position:absolute;z-index:1;left:0;right:0;top:8%;width:100%;height:auto;pointer-events:none}
+.traj path{fill:none;stroke:var(--primary);stroke-width:2.5;stroke-dasharray:2 14;stroke-linecap:round;opacity:.9}
+.fade-up{animation:fadeUp 1s .2s both cubic-bezier(.2,.7,.2,1)}
+.fade-up2{animation:fadeUp 1s .45s both cubic-bezier(.2,.7,.2,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+
+/* ---------- WHAT'S PARKOUR ---------- */
+.whats{background:var(--concrete)}
+.whats-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+.whats-photo{position:relative}
+.whats-photo img{border-radius:4px}
+.whats-photo::after{content:"";position:absolute;inset:14px -14px -14px 14px;border:2px solid var(--steel);border-radius:4px;z-index:-1;opacity:.5}
+.moves{display:flex;gap:10px;margin:22px 0 18px;flex-wrap:wrap}
+.moves span{font-weight:900;font-size:15px;background:var(--ink);color:var(--white);padding:8px 20px;border-radius:999px;letter-spacing:.1em}
+.moves span em{font-style:normal;color:var(--primary);font-family:var(--font-display);font-weight:400;font-size:11px;letter-spacing:.2em;margin-left:8px}
+
+/* ---------- ABOUT ---------- */
+.about{background:var(--concrete-2);position:relative}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:44px}
+.card{background:var(--white);border-radius:6px;overflow:hidden;box-shadow:0 2px 14px rgba(13,15,19,.08);display:flex;flex-direction:column}
+.card img{aspect-ratio:4/3;object-fit:cover;width:100%}
+.card-body{padding:22px 24px 26px;flex:1}
+.card-num{font-family:var(--font-display);color:var(--primary);font-size:13px;letter-spacing:.24em}
+.card h3{font-size:19px;font-weight:900;margin:6px 0 8px}
+.card p{font-size:14px;color:#3d4148}
+.card-meta{display:inline-block;margin-top:12px;font-size:12px;font-weight:700;color:var(--ink);background:var(--concrete);padding:4px 12px;border-radius:4px}
+
+/* ---------- LESSON ---------- */
+.lesson{background:var(--concrete)}
+.classes{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:44px;border:2px solid var(--ink);border-radius:6px;overflow:hidden}
+.class{padding:34px 28px;background:var(--white);position:relative}
+.class+.class{border-left:2px solid var(--ink)}
+.class-age{font-family:var(--font-display);font-size:12px;letter-spacing:.22em;color:var(--steel)}
+.class h3{font-size:22px;font-weight:900;margin:8px 0 4px}
+.class h3 b{color:var(--primary);font-weight:900}
+.class p{font-size:14px;color:#3d4148}
+.lesson-note{margin-top:26px;padding:22px 26px;background:var(--white);border-left:4px solid var(--primary);border-radius:0 6px 6px 0;font-size:14px}
+
+/* ---------- SCHEDULE / INFO（夜へ） ---------- */
+.nightzone{background:var(--ink);color:var(--white);position:relative;overflow:hidden}
+.nightzone .eyebrow{color:var(--primary)}
+.sched-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.timetable{width:100%;border-collapse:collapse;margin-top:10px}
+.timetable th,.timetable td{padding:16px 8px;border-bottom:1px solid rgba(135,141,148,.35);text-align:left;font-size:16px}
+.timetable th{font-weight:900;width:9em}
+.timetable td{font-family:var(--font-display);letter-spacing:.06em;font-size:18px;color:var(--primary)}
+.sched-notes{margin-top:14px;font-size:13px;color:rgba(250,250,248,.65);list-style:none}
+.sched-notes li{padding-left:1.2em;text-indent:-1.2em}
+.info-list{margin-top:10px}
+.info-list dt{font-weight:900;font-size:13px;color:var(--primary);letter-spacing:.12em;margin-top:18px}
+.info-list dd{font-size:16px}
+.info-list dd a{text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--steel)}
+.nightphoto{margin-top:64px;border-radius:6px;overflow:hidden;position:relative}
+.nightphoto img{width:100%;aspect-ratio:21/9;object-fit:cover}
+.nightphoto figcaption{position:absolute;left:18px;bottom:14px;font-size:12px;letter-spacing:.14em;color:rgba(250,250,248,.85);font-weight:700;text-shadow:0 1px 8px rgba(0,0,0,.8)}
+
+/* ---------- COACH ---------- */
+.coach{background:var(--ink-2);color:var(--white)}
+.coach-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center}
+.coach-photo{border-radius:6px;overflow:hidden;border:1px solid rgba(135,141,148,.4)}
+.coach-photo img{aspect-ratio:4/5;width:100%;object-fit:cover;object-position:center 82%}
+.coach-name{font-family:var(--font-display);font-size:clamp(34px,4.5vw,52px);letter-spacing:.06em;line-height:1.1;color:var(--white)}
+.coach-name small{display:block;font-size:13px;letter-spacing:.28em;color:var(--primary);margin-bottom:8px}
+.coach-tag{display:inline-block;margin:16px 0 18px;font-size:13px;font-weight:700;border:1px solid var(--primary);color:var(--primary);padding:5px 14px;border-radius:999px}
+.coach p{color:rgba(250,250,248,.85);font-size:15px}
+
+/* ---------- CTA ---------- */
+.cta{background:var(--ink);color:var(--white);text-align:center;position:relative;overflow:hidden}
+.cta-bg{position:absolute;inset:0;background:url(assets/night.jpg) center/cover no-repeat;opacity:.28}
+.cta::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(13,15,19,.1) 0%,rgba(13,15,19,.85) 100%)}
+.cta .wrap{position:relative;z-index:2}
+.cta .eyebrow{justify-content:center}
+.cta h2{color:var(--white)}
+.cta p{max-width:32em;margin:0 auto 30px}
+.cta .note{margin-top:18px;color:rgba(250,250,248,.6)}
+
+/* ---------- FOOTER ---------- */
+footer{background:#08090C;color:var(--steel);padding:34px 24px;text-align:center;font-size:12px;letter-spacing:.08em}
+footer .logo{color:var(--white);margin-bottom:8px;font-size:16px}
+
+/* ---------- レスポンシブ ---------- */
+@media(max-width:900px){
+  .section{padding:72px 0}
+  .hero h1{font-size:clamp(30px,8.6vw,44px)}
+  .whats-grid,.coach-grid,.sched-grid{grid-template-columns:1fr;gap:36px}
+  .cards{grid-template-columns:1fr;max-width:520px;margin-left:auto;margin-right:auto}
+  .classes{grid-template-columns:1fr}
+  .class+.class{border-left:none;border-top:2px solid var(--ink)}
+  .whats-photo{order:-1}
+  .nightphoto img{aspect-ratio:16/10}
+}
+/* アニメーションが苦手な方向け */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .fade-up,.fade-up2{animation:none}
+  .btn-line{transition:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">TSUKUMO<small>PARKOUR PARK — ZAMA</small></div>
+  <a class="header-cta" href="#trial">無料体験</a>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="hero-bg" role="img" aria-label="夜のパークで単管バーを飛び越えるトレーサー"></div>
+  <svg class="traj" viewBox="0 0 1200 400" aria-hidden="true">
+    <path d="M -40 380 Q 200 340 400 220 Q 620 90 820 120 Q 1020 150 1240 60"/>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <h1 class="fade-up"><span class="en">RUN / CLIMB / JUMP</span><span class="nb">走る、登る、跳ぶ。</span><br><span class="nb">それだけで、</span><span class="nb">強くなる。</span></h1>
+      <p class="fade-up2">ツクモ パルクールパークは、座間市にある屋外パルクール施設。単管とコンクリートでできた障害物は日々進化し、動きのバリエーションは無限大。年中さんから大人まで、初心者から玄人まで。</p>
+      <div class="hero-actions fade-up2">
+        <a class="btn-line" href="#trial">無料体験レッスンに申し込む</a>
+        <span class="hero-sub">毎週 水・土・日 開催｜要予約</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WHAT'S PARKOUR ================= -->
+<section class="section whats">
+  <div class="wrap">
+    <div class="whats-grid">
+      <div>
+        <div class="eyebrow"><span class="joint"></span>WHAT'S PARKOUR</div>
+        <h2>パルクールは、<br>「移動」を極めるスポーツ。</h2>
+        <div class="moves">
+          <span>走る<em>RUN</em></span>
+          <span>登る<em>CLIMB</em></span>
+          <span>跳ぶ<em>JUMP</em></span>
+        </div>
+        <p class="lead">走る・登る・跳ぶなどの移動動作を駆使し、心技体を鍛える究極の運動方法。移動動作はあらゆるスポーツの起点になるため、他のスポーツとの親和性も抜群です。</p>
+      </div>
+      <div class="whats-photo">
+        <img src="assets/whats.jpg" alt="単管バーにぶら下がって体を振る練習をする子ども" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section class="section about">
+  <div class="wrap">
+    <div class="eyebrow"><span class="joint"></span>ABOUT TSUKUMO</div>
+    <h2>日々進化する、屋外パルクールパーク。</h2>
+    <p class="lead">子どもから大人まで、初心者から玄人までパルクールを楽しめる施設です。専用の障害物は日々進化し、動きのバリエーションは無限大。3つの楽しみ方があります。</p>
+    <div class="cards">
+      <article class="card">
+        <img src="assets/school.jpg" alt="家族連れでにぎわう昼間のパークで遊ぶ子どもたち" loading="lazy">
+        <div class="card-body">
+          <div class="card-num">01</div>
+          <h3>パルクール教室</h3>
+          <p>熟練コーチによるレッスン。年齢と習熟度に合わせたクラスで、はじめてでも安心して上達できます。</p>
+          <span class="card-meta">毎週 水・土・日 開催</span>
+        </div>
+      </article>
+      <article class="card">
+        <img src="assets/opengym.jpg" alt="ナイター照明に照らされた夜のパーク" loading="lazy">
+        <div class="card-body">
+          <div class="card-num">02</div>
+          <h3>オープンジム</h3>
+          <p>パークを自由に使って動ける開放日。自分のペースで技を磨いたり、仲間と交流したり。</p>
+          <span class="card-meta">月2回 不定期開催</span>
+        </div>
+      </article>
+      <article class="card">
+        <img src="assets/jam.jpg" alt="バーの上でプランシェを決めるトッププレイヤー" loading="lazy">
+        <div class="card-body">
+          <div class="card-num">03</div>
+          <h3>JAM・イベント</h3>
+          <p>全国からトッププレイヤーが集まるJAMなどを開催。本物の動きを間近で見られるチャンス。</p>
+          <span class="card-meta">不定期開催</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LESSON ================= -->
+<section class="section lesson">
+  <div class="wrap">
+    <div class="eyebrow"><span class="joint"></span>LESSON CATEGORIES</div>
+    <h2>年中さんから、大人まで。</h2>
+    <div class="classes">
+      <div class="class">
+        <div class="class-age">KIDS</div>
+        <h3><b>キッズ</b>クラス</h3>
+        <p>年中以上からのレッスン。あそぶように体の使い方を身につけます。</p>
+      </div>
+      <div class="class">
+        <div class="class-age">YOUTH</div>
+        <h3><b>ユース</b>クラス</h3>
+        <p>中学生までのレッスン。基礎から応用へ、できる動きを増やしていきます。</p>
+      </div>
+      <div class="class">
+        <div class="class-age">SENIOR</div>
+        <h3><b>シニア</b>クラス</h3>
+        <p>高校生以上のレッスン。年齢を問わず、自分のレベルから始められます。</p>
+      </div>
+    </div>
+    <p class="lesson-note">年齢区分のほか、経験や習熟度に応じたクラス分けに加え、<strong>パーソナルレッスン・親子レッスン</strong>など幅広いレッスンに対応。お子様から年配の方まで安心してパルクールを楽しんでいただけます。</p>
+  </div>
+</section>
+
+<!-- ================= SCHEDULE / INFO ================= -->
+<section class="section nightzone">
+  <div class="wrap">
+    <div class="sched-grid">
+      <div>
+        <div class="eyebrow"><span class="joint"></span>SCHEDULE</div>
+        <h2>教室スケジュール</h2>
+        <table class="timetable">
+          <tr><th>水曜日</th><td>15:00 – 20:00</td></tr>
+          <tr><th>土曜日</th><td>10:00 – 20:00</td></tr>
+          <tr><th>日曜日</th><td>10:00 – 20:00</td></tr>
+        </table>
+        <ul class="sched-notes">
+          <li>※1コマ / 1時間・要予約</li>
+          <li>※雨天休講</li>
+          <li>※時間割など詳細はLINEからお問い合わせください</li>
+        </ul>
+      </div>
+      <div>
+        <div class="eyebrow"><span class="joint"></span>INFORMATION</div>
+        <h2>パーク情報</h2>
+        <dl class="info-list">
+          <dt>住所</dt>
+          <dd><a href="https://www.google.com/maps/search/?api=1&query=%E5%BA%A7%E9%96%93%E5%B8%82%E6%A0%97%E5%8E%9F959-10" target="_blank" rel="noopener">神奈川県座間市栗原959-10（Googleマップで開く）</a></dd>
+          <dt>対象年齢</dt>
+          <dd>年中以上</dd>
+          <dt>お問い合わせ</dt>
+          <dd>公式LINEからお気軽にどうぞ</dd>
+        </dl>
+      </div>
+    </div>
+    <figure class="nightphoto">
+      <img src="assets/opengym.jpg" alt="ナイター設備のある夜のツクモパルクールパーク全景" loading="lazy">
+      <figcaption>NIGHT SESSION — 照明完備で夜まで動ける</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= COACH ================= -->
+<section class="section coach">
+  <div class="wrap">
+    <div class="coach-grid">
+      <div class="coach-photo">
+        <img src="assets/coach.jpg" alt="木箱の上にプレシジョンジャンプで着地するコーチYuto" loading="lazy">
+      </div>
+      <div>
+        <div class="eyebrow"><span class="joint"></span>COACH PROFILE</div>
+        <div class="coach-name"><small>HEAD COACH</small>YUTO</div>
+        <span class="coach-tag">パルクール歴 16年</span>
+        <p>長年最前線でパルクール界を牽引してきたトップパルクールチーム「URBAN UNION」の設立メンバーとして、映画・CM・ミュージックビデオなど数多くのメディアに出演。現在はパルクール指導者として選手育成とパルクール普及に尽力している。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CTA ================= -->
+<section class="section cta" id="trial">
+  <div class="cta-bg" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="eyebrow"><span class="joint"></span>FREE TRIAL</div>
+    <h2>まずは、無料体験から。</h2>
+    <p>はじめてでも、運動が苦手でも大丈夫。まずは一度、パークで体を動かしてみてください。時間割の確認・ご予約・お問い合わせは公式LINEから。</p>
+    <!-- TODO: 公式LINEのURLに差し替える -->
+    <a class="btn-line" href="#" aria-label="LINEで無料体験レッスンに申し込む">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 5.64 2 10.13c0 4.03 3.58 7.4 8.41 8.04.33.07.77.22.89.5.1.26.07.66.03.92l-.14.86c-.04.26-.2 1.01.89.55 1.09-.46 5.87-3.46 8.01-5.92C21.66 13.4 22 11.83 22 10.13 22 5.64 17.52 2 12 2z"/></svg>
+      LINEで申し込む
+    </a>
+    <p class="note">※無料体験レッスンは要予約です。LINEのQRコードはチラシからも読み取れます。</p>
+  </div>
+</section>
+
+<footer>
+  <div class="logo">TSUKUMO PARKOUR PARK</div>
+  <p>神奈川県座間市栗原959-10</p>
+  <p>&copy; 2026 TSUKUMO PARKOUR PARK</p>
+</footer>
+
+</body>
+</html>
