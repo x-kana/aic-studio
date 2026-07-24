@@ -1,0 +1,77 @@
+/* ============================================================
+   tokens.css — デザイントークン
+   正本: docs/handoff/05_design_system.md §5（そのまま使用）
+   ============================================================ */
+:root {
+  /* ---- Color ---- */
+  --c-red: #B2232A;          /* 【要確認】ロゴ実色と照合後に最終化 */
+  --c-red-dark: #8F1B21;
+  --c-red-tint: #FAEFEF;
+  --c-red-on-dark: #E0666C;
+  --c-ink: #1A1D21;
+  --c-ink-sub: #43484E;
+  --c-ink-weak: #6B7178;
+  --c-line: #E2E0DB;
+  --c-line-strong: #C9C6BF;
+  --c-paper: #F7F6F3;
+  --c-white: #FFFFFF;
+  --c-dark: #22262B;
+  --c-dark-deep: #1B1F23;
+  --c-on-dark: #F4F3F0;
+  --c-on-dark-sub: #B9BCC0;
+  --c-focus: #2563EB;
+  --c-error: #B2232A;
+  --c-success: #1E7A46;
+
+  /* ---- Typography ---- */
+  --font-sans: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic Medium", sans-serif;
+  --font-serif: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --fs-display: clamp(1.875rem, 1.05rem + 3.5vw, 2.875rem);
+  --fs-h1: clamp(1.625rem, 1.3rem + 1.6vw, 2.25rem);
+  --fs-h2: clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem);
+  --fs-h3: clamp(1.125rem, 1.06rem + 0.3vw, 1.25rem);
+  --fs-h4: 1rem;
+  --fs-body: 1rem;
+  --fs-body-s: 0.875rem;
+  --fs-caption: 0.8125rem;
+  --fs-label: 0.8125rem;
+  --fs-data-l: clamp(1.25rem, 1.1rem + 0.7vw, 1.5rem);
+  --lh-body: 1.9;
+  --lh-heading: 1.45;
+  --ls-heading: 0.03em;
+  --ls-body: 0.02em;
+  --ls-label: 0.08em;
+
+  /* ---- Spacing / Layout ---- */
+  --sp-1: 4px;  --sp-2: 8px;   --sp-3: 12px; --sp-4: 16px; --sp-5: 24px;
+  --sp-6: 32px; --sp-7: 48px;  --sp-8: 64px; --sp-9: 96px; --sp-10: 128px;
+  --section-pad: clamp(64px, 6vw + 32px, 96px);
+  --container-max: 1120px;
+  --container-pad: clamp(20px, 4vw, 40px);
+  --measure: 720px;            /* 本文段落の最大幅 */
+
+  /* ---- Shape / Elevation / Motion ---- */
+  --radius: 4px;
+  --radius-l: 8px;
+  --shadow-header: 0 1px 0 var(--c-line);
+  --shadow-float: 0 8px 24px rgba(26, 29, 33, 0.10);
+  --dur: 0.2s;
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* ベース */
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+  color: var(--c-ink);
+  background: var(--c-white);
+  font-feature-settings: "palt" 0; /* 本文はベタ組み。見出しのみpalt可 */
+}
+h1, h2, .u-serif { font-family: var(--font-serif); font-weight: 600; line-height: var(--lh-heading); letter-spacing: var(--ls-heading); font-feature-settings: "palt"; }
+.u-num { font-feature-settings: "tnum"; }
+:focus-visible { outline: 2px solid var(--c-focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation: none !important; }
+}
