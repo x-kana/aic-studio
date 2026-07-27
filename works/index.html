@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="イニシエ株式会社が開発した業務システム・AI・ハードウェア・映像制作の自動化・Web基盤 23件の記録。">
+<meta name="description" content="AIを活用した高速プロトタイピングで、企業・部署ごとに専用設計されたシステムをハードウェアまで含めて開発する。業務システム・AI・ハードウェア・映像制作・Web基盤 23件の記録。">
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   img { max-width: 100%; }
 </style>
-<title>開発実績 — イニシエ株式会社</title>
+<title>AIを活用した開発実績 — イニシエ株式会社</title>
 </head>
 <body>
 <style>
@@ -182,6 +182,54 @@
     position: absolute;
     left: 0; top: 0;
     width: 72px; height: 1px;
+    background: var(--accent-bright);
+  }
+
+  .tagline {
+    max-width: 30em;
+    font-size: 19px;
+    line-height: 1.85;
+    color: var(--text);
+    font-weight: 500;
+    margin: 0 0 40px;
+  }
+
+  /* ===== コンセプト ===== */
+  .concept {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 0 24px;
+    margin-bottom: 92px;
+  }
+  .concept-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .22em;
+    color: var(--accent);
+    margin: 5px 0 0;
+  }
+  .concept-body { max-width: 40em; }
+  .concept-body p { margin: 0 0 18px; font-size: 15px; line-height: 1.95; }
+  .concept-body p:last-child { margin-bottom: 0; }
+  .concept-body ul {
+    list-style: none;
+    margin: 0 0 18px;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+  .concept-body li {
+    position: relative;
+    padding-left: 20px;
+    font-size: 15px;
+    line-height: 1.9;
+    color: var(--text);
+  }
+  .concept-body li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: .85em;
+    width: 10px; height: 1px;
     background: var(--accent-bright);
   }
 
@@ -488,6 +536,8 @@
     .grid { columns: 1; }
     .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 68px; }
     .hero { padding-top: 56px; }
+    .tagline { font-size: 17px; }
+    .concept { grid-template-columns: 1fr; gap: 10px; margin-bottom: 60px; }
     section { margin-bottom: 68px; }
     .closing { padding: 28px 22px; }
   }
@@ -508,12 +558,24 @@
 
   <header class="hero">
     <p class="eyebrow fade">DEVELOPMENT WORKS &nbsp;/&nbsp; 2026-07-27</p>
-    <h1 class="fade">これまでに開発した<br><span class="accent">23件</span>の記録。</h1>
-    <p class="lede fade">
-      業務システム、AI・画像認識、ハードウェア、映像制作の自動化、Web・デザイン基盤の5領域。
-      各案件の内容と、2026年7月時点の稼働状況を記載する。クライアント名は伏せ、適用先の業種のみを示す。
+    <h1 class="fade">AIを活用した<span class="accent">開発実績</span></h1>
+    <p class="tagline fade">
+      AIを活用した高速プロトタイピングで、企業・部署ごとに専用設計されたシステムを、
+      ハードウェアまで含めて開発する。
     </p>
     <div class="rule fade"></div>
+
+    <div class="concept">
+      <p class="concept-label">CONCEPT</p>
+      <div class="concept-body">
+        <p>AIを活用したコーディングにより、プロトタイプを高速でつくれるようになった。これにより、これまでコストが見合わなかった「その企業・その部署だけのためのシステム」が現実的な選択肢になる。</p>
+        <ul>
+          <li>既製のサービスに業務を合わせるのではなく、業務にデータベースとUIを合わせる。</li>
+          <li>ソフトウェアだけでは届かない領域は、ハードウェアも含めて開発することで対応範囲を広げる。</li>
+        </ul>
+        <p>これらを軸に「企画 → 開発 → 検証 → 修正」のサイクルを短く回しながら、現場に最適化された形へ育てていく。自社のAIエージェントに社内ライブラリを参照させることで、開発サイクルそのものの高速化を図る。</p>
+      </div>
+    </div>
 
     <div class="stats">
       <div class="stat">
@@ -525,8 +587,8 @@
         <div class="stat-label">本ページに掲載した案件</div>
       </div>
       <div class="stat">
-        <div class="stat-num">2<span class="unit">件</span></div>
-        <div class="stat-label">クラウドで運用中</div>
+        <div class="stat-num">8<span class="unit">件</span></div>
+        <div class="stat-label">運用中・試験運用中</div>
       </div>
       <div class="stat">
         <div class="stat-num">5<span class="unit">領域</span></div>
