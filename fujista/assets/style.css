@@ -117,18 +117,15 @@ ul{list-style:none;margin:0;padding:0}
 .hero__price i{font-style:normal;font-size:11.5px;opacity:.7;letter-spacing:.06em}
 
 /* ─── shooting price ─── */
-.shoot{
-  background:var(--ink);color:var(--paper);
-  display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(32px,5vw,80px);
-  padding:clamp(56px,7vw,96px) var(--gut) clamp(48px,6vw,80px);
-  align-items:start;
+.shoot{padding-top:clamp(64px,8vw,110px);padding-bottom:clamp(56px,7vw,92px)}
+.shoot .sec-head{margin-bottom:clamp(30px,4vw,48px)}
+.shoot__rates{
+  display:grid;grid-template-columns:1fr 1fr;
+  border-top:1px solid var(--line);
 }
-.shoot h2{font-size:clamp(26px,3.4vw,42px);line-height:1.22;margin:0 0 16px;font-weight:700}
-.shoot__lead p:last-child{margin:0;font-size:13.5px;line-height:2;color:#a7a29a}
-.shoot__rates{display:grid;grid-template-columns:1fr 1fr}
-.rate{padding-left:clamp(20px,2.6vw,40px);border-left:1px solid var(--line)}
-.rate:first-child{padding-left:0;border-left:0}
-.rate__label{display:block;font-size:11px;letter-spacing:.2em;color:var(--mute);margin-bottom:8px}
+.rate{padding:clamp(26px,3vw,38px) clamp(24px,3vw,40px) 0 0}
+.rate + .rate{padding-right:0;padding-left:clamp(24px,3vw,40px);border-left:1px solid var(--line)}
+.rate__label{display:block;font-size:11px;letter-spacing:.2em;color:var(--mute);margin-bottom:10px}
 .rate__price{margin:0;font-family:var(--font-en);line-height:1}
 .rate__price b{
   font-size:clamp(38px,4.6vw,60px);font-weight:700;
@@ -358,7 +355,6 @@ ul{list-style:none;margin:0;padding:0}
   .nav.is-open a{padding:14px 0;border-bottom:1px solid var(--line);font-size:14px}
   .burger{display:block}
   .btn--head{display:none}
-  .shoot{grid-template-columns:1fr;gap:28px}
   .specbar{grid-template-columns:1fr 1fr;gap:28px 8px}
   .specbar dl:nth-child(3){border-left:0;padding-left:0}
   .duo__item{grid-template-columns:1fr}
@@ -376,8 +372,9 @@ ul{list-style:none;margin:0;padding:0}
   .grid{grid-template-columns:repeat(2,1fr)}
   .cell--wide{grid-column:span 2;aspect-ratio:3/2}
   .uses{grid-template-columns:1fr}
-  .shoot__rates{grid-template-columns:1fr;gap:28px}
-  .rate{padding-left:0;border-left:0}
+  .shoot__rates{grid-template-columns:1fr}
+  .rate{padding-right:0}
+  .rate + .rate{padding-left:0;border-left:0;border-top:1px solid var(--line)}
   .hero__price{gap:4px 12px}
   .plans{grid-template-columns:1fr}
   .rules{grid-template-columns:1fr}
