@@ -104,6 +104,37 @@ ul{list-style:none;margin:0;padding:0}
 }
 .hero__scroll span{width:1px;height:56px;background:currentColor;display:block}
 
+.hero__price{
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  margin:0 0 26px;padding:14px 20px;
+  border:1px solid rgba(255,255,255,.28);
+  background:rgba(10,10,11,.45);backdrop-filter:blur(4px);
+  width:fit-content;max-width:100%;
+}
+.hero__price span{font-size:12px;letter-spacing:.1em;opacity:.8}
+.hero__price b{
+  font-family:var(--font-en);font-size:clamp(22px,2.6vw,30px);
+  font-weight:700;letter-spacing:.01em;color:var(--accent-soft);
+}
+.hero__price i{font-style:normal;font-size:11.5px;opacity:.72;letter-spacing:.06em}
+
+/* ─── shooting price band ─── */
+.shoot{
+  background:var(--accent);color:#fff;
+  display:grid;grid-template-columns:1fr 1.1fr;gap:clamp(28px,4vw,64px);
+  padding:clamp(44px,6vw,80px) var(--gut);align-items:center;
+}
+.eyebrow--on{color:rgba(255,255,255,.75)}
+.shoot h2{font-size:clamp(26px,3.4vw,42px);line-height:1.2;margin:0 0 14px;font-weight:700}
+.shoot__lead p:last-child{margin:0;font-size:13.5px;line-height:2;color:rgba(255,255,255,.86)}
+.shoot__rates{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:rgba(255,255,255,.28)}
+.rate{background:var(--accent);padding:clamp(20px,2.4vw,30px)}
+.rate__label{display:block;font-size:12px;letter-spacing:.1em;color:rgba(255,255,255,.82);margin-bottom:10px}
+.rate__price{margin:0;font-family:var(--font-en);line-height:1}
+.rate__price b{font-size:clamp(36px,4.4vw,56px);font-weight:700;letter-spacing:-.01em}
+.rate__price small{font-size:14px;margin-left:5px;letter-spacing:.04em}
+.rate__note{display:block;font-size:11.5px;color:rgba(255,255,255,.8);margin-top:12px;line-height:1.7}
+
 /* ─── spec bar ─── */
 .specbar{
   background:var(--ink);color:var(--paper);
@@ -211,6 +242,11 @@ ul{list-style:none;margin:0;padding:0}
 .eq__note{font-size:12px;color:var(--mute);margin:18px 0 0;line-height:1.8}
 
 /* ─── price ─── */
+.plans__head{
+  font-size:13px;letter-spacing:.16em;font-weight:500;color:#6b6660;
+  margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--line-light);
+}
+.plans + .plans__head{margin-top:clamp(40px,5vw,64px)}
 .plans{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .plan{border:1px solid var(--line-light);padding:clamp(28px,4vw,44px)}
 .plan--accent{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -319,6 +355,7 @@ ul{list-style:none;margin:0;padding:0}
   .nav.is-open a{padding:14px 0;border-bottom:1px solid var(--line);font-size:14px}
   .burger{display:block}
   .btn--head{display:none}
+  .shoot{grid-template-columns:1fr;gap:28px}
   .specbar{grid-template-columns:1fr 1fr;gap:28px 8px}
   .specbar dl:nth-child(3){border-left:0;padding-left:0}
   .duo__item{grid-template-columns:1fr}
@@ -336,6 +373,8 @@ ul{list-style:none;margin:0;padding:0}
   .grid{grid-template-columns:repeat(2,1fr)}
   .cell--wide{grid-column:span 2;aspect-ratio:3/2}
   .uses{grid-template-columns:1fr}
+  .shoot__rates{grid-template-columns:1fr}
+  .hero__price{gap:8px 12px;padding:12px 16px}
   .plans{grid-template-columns:1fr}
   .rules{grid-template-columns:1fr}
   .stations li{font-size:12.5px}
