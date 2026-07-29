@@ -82,7 +82,10 @@ ul{list-style:none;margin:0;padding:0}
     linear-gradient(180deg,rgba(10,10,11,.72) 0%,rgba(10,10,11,.18) 30%,rgba(10,10,11,.58) 64%,rgba(10,10,11,.93) 100%),
     linear-gradient(90deg,rgba(10,10,11,.72) 0%,rgba(10,10,11,.28) 42%,rgba(10,10,11,0) 70%);
 }
-.hero__body{position:relative;padding:0 var(--gut) clamp(72px,12vh,140px);max-width:900px}
+.hero__body{
+  position:relative;max-width:1040px;
+  padding:clamp(96px,14vh,150px) var(--gut) clamp(72px,12vh,140px);
+}
 .eyebrow{
   font-family:var(--font-en);font-size:12px;letter-spacing:.32em;
   text-transform:uppercase;color:var(--accent-soft);margin:0 0 18px;
@@ -90,11 +93,15 @@ ul{list-style:none;margin:0;padding:0}
 .hero .eyebrow{color:#ff9670;text-shadow:0 1px 14px rgba(10,10,11,.85)}
 .hero__title{
   text-shadow:0 2px 40px rgba(10,10,11,.5);
-  font-size:clamp(56px,12vw,150px);line-height:.92;margin:0 0 26px;
+  font-size:clamp(46px,9.4vw,118px);line-height:.96;margin:0 0 26px;
   font-weight:700;letter-spacing:-.01em;
 }
 .hero__title span{display:block}
-.hero__title span:last-child{margin-left:.6em;color:var(--paper)}
+.hero__title-sm{
+  font-size:.4em;letter-spacing:.02em;line-height:1.25;
+  margin-bottom:.12em;color:var(--paper);
+}
+.hero__title span:last-child{margin-left:.5em;color:var(--paper)}
 .hero__lead{font-size:clamp(13.5px,1.4vw,16px);line-height:2;max-width:44em;opacity:.88;margin:0 0 34px}
 .hero__cta{display:flex;gap:14px;flex-wrap:wrap}
 .hero__scroll{
