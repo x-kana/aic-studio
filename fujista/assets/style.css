@@ -93,15 +93,11 @@ ul{list-style:none;margin:0;padding:0}
 .hero .eyebrow{color:#ff9670;text-shadow:0 1px 14px rgba(10,10,11,.85)}
 .hero__title{
   text-shadow:0 2px 40px rgba(10,10,11,.5);
-  font-size:clamp(46px,9.4vw,118px);line-height:.96;margin:0 0 26px;
+  font-size:clamp(56px,12vw,150px);line-height:.92;margin:0 0 26px;
   font-weight:700;letter-spacing:-.01em;
 }
 .hero__title span{display:block}
-.hero__title-sm{
-  font-size:.4em;letter-spacing:.02em;line-height:1.25;
-  margin-bottom:.12em;color:var(--paper);
-}
-.hero__title span:last-child{margin-left:.5em;color:var(--paper)}
+.hero__title span:last-child{margin-left:.6em;color:var(--paper)}
 .hero__lead{font-size:clamp(13.5px,1.4vw,16px);line-height:2;max-width:44em;opacity:.88;margin:0 0 34px}
 .hero__cta{display:flex;gap:14px;flex-wrap:wrap}
 .hero__scroll{
