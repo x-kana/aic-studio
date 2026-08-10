@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>お茶の淹れ方タイマー｜かおりちゃん・宇治森徳</title>
+<meta name="description" content="このお茶に合った湯温・茶葉の量・抽出時間。タップで動くタイマーつき。アプリは要りません。">
+<meta name="theme-color" content="#2E4636">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="お茶タイマー">
+<style>
+:root{
+  --paper:#F6F4ED; --card:#FFFDF7; --ink:#1F211E; --ink-2:#4C504A; --muted:#8A8C83;
+  --green:#2E4636; --green-l:#4A6B54; --accent:#9C6B3F; --line:#DFDACB; --line-2:#EBE7DB;
+  --serif:"Hiragino Mincho ProN","Yu Mincho",YuMincho,"Noto Serif JP","Songti SC",serif;
+  --sans:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",YuGothic,"Noto Sans JP",system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;
+  line-height:1.85;-webkit-font-smoothing:antialiased;letter-spacing:.02em;
+  transition:background .6s,color .6s}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(rgba(120,110,85,.055) 1px,transparent 1px);background-size:3px 3px}
+body.done{background:var(--green);color:#EFEDE4}
+body.done::before{opacity:.25}
+.wrap{position:relative;z-index:1;max-width:460px;margin:0 auto;
+  padding:0 22px calc(48px + env(safe-area-inset-bottom));min-height:100vh}
+.screen{display:none}
+.screen.on{display:block;animation:rise .45s cubic-bezier(.2,.7,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.small{font-size:11.5px;letter-spacing:.14em;color:var(--muted)}
+
+/* ── 商品選択 ── */
+.pickhead{padding-top:9vh;text-align:center;margin-bottom:34px}
+.brand{font-size:10.5px;letter-spacing:.42em;color:var(--muted);margin-bottom:26px}
+.pickhead h1{font-family:var(--serif);font-weight:400;font-size:29px;line-height:1.5;
+  letter-spacing:.18em;margin:0 0 10px;text-indent:.18em;color:var(--green)}
+.pickhead p{margin:0;font-size:13px;color:var(--ink-2);line-height:2}
+.search{width:100%;padding:14px 16px;border:1px solid var(--line);background:var(--card);
+  font-family:var(--sans);font-size:15px;color:var(--ink);margin-bottom:4px}
+.search:focus{outline:none;border-color:var(--green-l)}
+.plist{max-height:56vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border-bottom:1px solid var(--line-2)}
+.pcat{font-family:var(--serif);font-size:11.5px;letter-spacing:.22em;color:var(--accent);
+  padding:18px 0 6px;border-bottom:1px solid var(--line-2)}
+.pitem{display:block;width:100%;text-align:left;background:none;border:0;
+  border-bottom:1px solid var(--line-2);padding:14px 26px 14px 2px;cursor:pointer;position:relative;
+  font-family:var(--sans);font-size:14.5px;color:var(--ink);transition:padding-left .2s,color .2s}
+.pitem small{display:block;font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+.pitem::after{content:"";position:absolute;right:6px;top:50%;width:6px;height:6px;
+  border-right:1px solid var(--line);border-top:1px solid var(--line);
+  transform:translateY(-50%) rotate(45deg);transition:.2s}
+.pitem:hover{padding-left:12px;color:var(--green)}
+.pitem:hover::after{border-color:var(--accent);right:2px}
+.hint{margin-top:22px;font-size:11.5px;line-height:1.95;color:var(--muted);text-align:center}
+
+/* ── タイマー ── */
+.thead{padding-top:34px;text-align:center}
+.tcat{font-family:var(--serif);font-size:11.5px;letter-spacing:.24em;color:var(--accent);margin:0 0 8px;text-indent:.24em}
+body.done .tcat{color:#B9C7B8}
+.tname{font-family:var(--serif);font-weight:400;font-size:23px;line-height:1.5;
+  letter-spacing:.05em;margin:0;color:var(--green)}
+body.done .tname{color:#EFEDE4}
+body.done .change{color:#9FB2A0}
+.change{background:none;border:0;margin-top:10px;color:var(--muted);font-size:11.5px;
+  letter-spacing:.1em;cursor:pointer;font-family:var(--sans);text-decoration:underline;text-underline-offset:4px}
+
+.steps{display:flex;gap:0;margin:26px 0 6px;border-bottom:1px solid var(--line)}
+body.done .steps{border-color:rgba(239,237,228,.3)}
+.step{flex:1;background:none;border:0;padding:11px 4px;cursor:pointer;position:relative;
+  font-family:var(--sans);font-size:12.5px;letter-spacing:.1em;color:var(--muted);transition:color .2s}
+.step.on{color:var(--green)}
+body.done .step{color:#9FB2A0} body.done .step.on{color:#EFEDE4}
+.step.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent)}
+
+.dialwrap{display:flex;justify-content:center;margin:30px 0 4px}
+.dial{position:relative;width:min(280px,72vw);aspect-ratio:1}
+.dial svg{transform:rotate(-90deg);display:block;width:100%;height:100%}
+.dial circle{fill:none;stroke-width:1.5}
+.dial .tr{stroke:var(--line)}
+body.done .dial .tr{stroke:rgba(239,237,228,.25)}
+.dial .pg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .3s linear}
+.dial .face{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.tval{font-family:var(--serif);font-weight:400;font-size:min(62px,16vw);letter-spacing:.02em;
+  color:var(--green);line-height:1;font-variant-numeric:tabular-nums}
+body.done .tval{color:#EFEDE4}
+.tsub{margin-top:12px;font-size:11.5px;letter-spacing:.16em;color:var(--muted)}
+body.done .tsub{color:#B9C7B8}
+
+.specs{display:flex;text-align:center;margin:22px 0 26px;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}
+body.done .specs{border-color:rgba(239,237,228,.22)}
+.specs div{flex:1;padding:16px 6px;min-width:0}
+.specs div+div{border-left:1px solid var(--line-2)}
+body.done .specs div+div{border-color:rgba(239,237,228,.22)}
+.specs span{display:block;font-size:10.5px;letter-spacing:.16em;color:var(--muted);margin-bottom:6px}
+body.done .specs span{color:#9FB2A0}
+.specs b{font-family:var(--serif);font-weight:400;font-size:19px;color:var(--green);letter-spacing:.02em}
+body.done .specs b{color:#EFEDE4}
+
+.ctrl{display:flex;gap:10px}
+.cbtn{flex:1;padding:17px 0;border:1px solid var(--line);background:transparent;color:var(--green);
+  font-family:var(--serif);font-size:15px;letter-spacing:.24em;text-indent:.24em;cursor:pointer;transition:.2s}
+.cbtn:hover{background:#EFEDE4}
+.cbtn.pri{flex:2;background:var(--green);border-color:var(--green);color:#F6F4ED}
+.cbtn.pri:hover{background:#25392B}
+body.done .cbtn{border-color:rgba(239,237,228,.4);color:#EFEDE4}
+body.done .cbtn:hover{background:rgba(239,237,228,.12)}
+body.done .cbtn.pri{background:#EFEDE4;border-color:#EFEDE4;color:var(--green)}
+
+.voice{margin-top:30px;padding:20px 22px;background:#EFEDE2;border-left:2px solid var(--green-l)}
+.voice p{margin:0;font-family:var(--serif);font-size:14px;line-height:2.05}
+.voice cite{display:block;margin-top:12px;font-style:normal;font-size:11px;letter-spacing:.12em;color:var(--muted)}
+body.done .voice{display:none}
+
+.donepanel{display:none;margin-top:34px;text-align:center}
+body.done .donepanel{display:block;animation:rise .6s cubic-bezier(.2,.7,.3,1) both}
+.donepanel h3{font-family:var(--serif);font-weight:400;font-size:19px;letter-spacing:.14em;margin:0 0 6px;text-indent:.14em}
+.donepanel p{margin:0 0 22px;font-size:13px;line-height:2.05;color:#CFD8CB}
+.lbtn{display:block;padding:17px;background:#EFEDE4;color:var(--green);text-decoration:none;
+  font-family:var(--serif);font-size:15px;letter-spacing:.16em;text-indent:.16em;transition:.2s}
+.lbtn:hover{background:#fff}
+.lbtn2{display:block;margin-top:10px;padding:14px;border:1px solid rgba(239,237,228,.35);
+  color:#EFEDE4;text-decoration:none;font-size:12.5px;letter-spacing:.16em;transition:.2s}
+.lbtn2:hover{border-color:#EFEDE4}
+.foot{margin-top:30px;text-align:center;font-size:10.5px;letter-spacing:.16em;color:#B4B2A6;line-height:1.9}
+body.done .foot{color:rgba(239,237,228,.5)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<section class="screen on" id="s-pick">
+  <div class="pickhead">
+    <div class="brand">KAORICHAN / UJIMORITOKU</div>
+    <h1>お茶の淹れ方</h1>
+    <p>いま淹れるお茶を選んでください。<br>湯温・量・時間と、タイマーが出ます。</p>
+  </div>
+  <input class="search" id="q" type="search" placeholder="商品名で探す" oninput="renderList()" autocomplete="off">
+  <div class="plist" id="plist"></div>
+  <p class="hint">パッケージのQRコードから開くと、<br>その商品のタイマーが直接ひらきます。</p>
+</section>
+
+<section class="screen" id="s-timer">
+  <div class="thead">
+    <p class="tcat" id="t-cat"></p>
+    <h2 class="tname" id="t-name"></h2>
+    <button class="change" onclick="toPick()">別のお茶にする</button>
+  </div>
+  <div class="steps" id="t-steps"></div>
+  <div class="dialwrap">
+    <div class="dial">
+      <svg viewBox="0 0 260 260" aria-hidden="true">
+        <circle class="tr" cx="130" cy="130" r="122"></circle>
+        <circle class="pg" id="ring" cx="130" cy="130" r="122" stroke-dasharray="766.5" stroke-dashoffset="0"></circle>
+      </svg>
+      <div class="face">
+        <div class="tval" id="t-val">1:00</div>
+        <div class="tsub" id="t-sub">湯を注いだら、はじめる</div>
+      </div>
+    </div>
+  </div>
+  <div class="specs">
+    <div><span>湯の温度</span><b id="t-temp"></b></div>
+    <div><span>使う量</span><b id="t-amt"></b></div>
+  </div>
+  <div class="ctrl" id="t-ctrl">
+    <button class="cbtn pri" id="t-go" onclick="toggle()">はじめる</button>
+    <button class="cbtn" onclick="reset()">戻す</button>
+  </div>
+  <div class="voice"><p id="t-voice"></p><cite>茶審査技術六段位</cite></div>
+
+  <div class="donepanel">
+    <h3>毎月、旬の淹れ方を</h3>
+    <p>季節に合う茶葉と、その一杯のための湯温と時間を。<br>月に一度だけ、お送りします。</p>
+    <a class="lbtn" href="#" onclick="return line()">LINEで受け取る</a>
+    <a class="lbtn2" id="d-diag" href="shindan.html">好みに合うお茶を診断する</a>
+  </div>
+  <div class="foot" id="t-foot"></div>
+</section>
+</div>
+
+<script>
+var TAGS=["umami", "koku", "kobashi", "sukkiri", "kaori", "dessert", "noncaf", "quick", "leaf", "honkaku", "meal", "health", "temae"];
+var PRODUCTS=[{"n": "ほうじ茶カプチーノ", "c": "ほうじ茶", "p": "648", "v": "75 g （15 g x 5 パック）", "d": "京都府産１００％の焙煎度合いにこだわったほうじ茶を使用しました。ほうじ茶特有のビター感となめらかさを出すために石臼挽きにして使用しています。ミルクに負けないエスプレッソのようなビター感と香ばしい香りのカプチーノです。", "j": "4970058489033", "u": "https://kaorichan.co.jp/product/%e3%81%bb%e3%81%86%e3%81%98%e8%8c%b6%e3%82%ab%e3%83%97%e3%83%81%e3%83%bc%e3%83%8e/", "t": [1, 2, 3, 0, 2, 3, 0, 3, 0, 1, 0, 0, 0], "b": "cappuccino"}, {"n": "ほうじ茶ティーバッグ30P", "c": "ほうじ茶", "p": "648", "v": "120g ( 4g x 30パック )", "d": "ロングセラー商品のかおりちゃんほうじ茶ティーバッグは、香ばしい香りとすっきりした味わいで、お食事にもおすすめです。", "j": "4970058497182", "u": "https://kaorichan.co.jp/product/%e3%81%bb%e3%81%86%e3%81%98%e8%8c%b6%e3%83%86%e3%82%a3%e3%83%bc%e3%83%90%e3%83%83%e3%82%b030p/", "t": [1, 1, 3, 3, 1, 0, 0, 3, 0, 0, 3, 0, 0], "b": "tb_hojicha"}, {"n": "京のほうじ番茶100g", "c": "ほうじ茶", "p": "540", "v": "100g", "d": "京のほうじ番茶は香ばしく、さっぱりとした風味で、脂っこい料理の後やお茶漬けにもおすすめのお茶です。", "j": "4970058497090", "u": "https://kaorichan.co.jp/product/%e4%ba%ac%e3%81%ae%e3%81%bb%e3%81%86%e3%81%98%e7%95%aa%e8%8c%b6100g/", "t": [0, 1, 3, 3, 1, 0, 0, 0, 3, 1, 3, 0, 0], "b": "leaf_hojicha"}, {"n": "匠 ほうじ茶 ティーバッグ 20P", "c": "ほうじ茶", "p": "918", "v": "80 g （4 g x 20 パック）", "d": "ほうじ茶の匠 西川製茶場と宇治森徳が「おいしいティーバッグがほしい」という消費者の声に応えたいと火入れと茶葉にこだわり作り上げたほうじ茶シルキーパックです。 使用している茶葉は、一番茶のみです。", "j": "4970058493894", "u": "https://kaorichan.co.jp/product/%e5%8c%a0-%e3%81%bb%e3%81%86%e3%81%98%e8%8c%b6-%e3%83%86%e3%82%a3%e3%83%bc%e3%83%90%e3%83%83%e3%82%b0-20p/", "t": [1, 2, 3, 1, 3, 0, 0, 3, 0, 3, 1, 0, 0], "b": "tb_hojicha"}, {"n": "夕かおりシルキー50ｐ", "c": "ほうじ茶", "p": "1,080", "v": "150 g （3 g x 50 パック）", "d": "香りの高い茶葉を厳選し、ほうじ茶に仕上げました。熱湯を注ぐと、癒しの香りが広がります。 茶がゆにもご使用いただけます。", "j": "夕かおりシルキー50", "u": "https://kaorichan.co.jp/product/%e5%a4%95%e3%81%8b%e3%81%8a%e3%82%8a%e3%82%b7%e3%83%ab%e3%82%ad%e3%83%bc50%ef%bd%90/", "t": [1, 1, 3, 2, 3, 0, 0, 3, 0, 2, 1, 0, 0], "b": "tb_hojicha"}, {"n": "雁ヶ音ほうじ100g", "c": "ほうじ茶", "p": "648", "v": "100 g", "d": "かりがね（茎茶）をブレンドし、独自の火入れで香ばしく煎り上げたお茶です。", "j": "4970058147773", "u": "https://kaorichan.co.jp/product/%e9%9b%81%e3%83%b6%e9%9f%b3%e3%81%bb%e3%81%86%e3%81%98100g/", "t": [2, 1, 3, 2, 2, 0, 0, 0, 3, 1, 1, 0, 0], "b": "leaf_hojicha"}, {"n": "イチゴ紅茶", "c": "ハーブティー", "p": "540", "v": "20 g （2 g x 10 パック）", "d": "セイロン紅茶にフリーズドライのイチゴを加えました。イチゴの風味は飲みやすく、気分もリラックスできます。", "j": "4965619810128", "u": "https://kaorichan.co.jp/product/%e3%82%a4%e3%83%81%e3%82%b4%e7%b4%85%e8%8c%b6/", "t": [0, 1, 0, 2, 3, 3, 0, 3, 0, 0, 0, 0, 0], "b": "tb_flavor"}, {"n": "プレミアムジャスミン茶", "c": "ハーブティー", "p": "486", "v": "30 g ( 15袋 )", "d": "香りの良い特級茶葉をベースに、高級ジャスミン茶“銀毫”を加えて、上品で華やかな香りに仕上げた、プレミアムタイプのジャスミン茶ティーバッグです。", "j": "4970058496222", "u": "https://kaorichan.co.jp/product/%e3%83%97%e3%83%ac%e3%83%9f%e3%82%a2%e3%83%a0%e3%82%b8%e3%83%a3%e3%82%b9%e3%83%9f%e3%83%b3%e8%8c%b6/", "t": [1, 1, 0, 3, 3, 1, 0, 3, 0, 3, 1, 0, 0], "b": "tb_jasmine"}, {"n": "白桃烏龍茶", "c": "ハーブティー", "p": "648", "v": "20 g （2.5g x 8パック）", "d": "台湾産凍頂烏龍茶使用。苦みがなくスッキリした風味です。甘い香りの完熟桃のフレーバー、さらにローズの花びら入り。", "j": "4965619500593", "u": "https://kaorichan.co.jp/product/%e7%99%bd%e6%a1%83%e3%82%a6%e3%83%bc%e3%83%ad%e3%83%b3%e8%8c%b6/", "t": [0, 0, 0, 3, 3, 2, 0, 3, 0, 2, 0, 0, 0], "b": "tb_flavor"}, {"n": "17ブレンド茶", "c": "健康茶", "p": "702", "v": "180 g （6 g x 30 パック）", "d": "国産原料を使用した17ブレンド茶です。 大麦をベースとしているので、飲みやすく、しかし野草感も感じてもらえる仕上げとなっています。 お湯出し・水出し両用です。", "j": "4970058493870", "u": "https://kaorichan.co.jp/product/17%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e8%8c%b6/", "t": [0, 1, 3, 3, 1, 0, 3, 3, 0, 1, 2, 3, 0], "b": "tb_health"}, {"n": "ごぼう茶ティーバッグ", "c": "健康茶", "p": "648", "v": "1.5 g x 15 袋", "d": "ごぼうを焙煎した、香ばしい風味のノンカフェインのティーバッグです。", "j": "4970058495003", "u": "https://kaorichan.co.jp/product/%e3%81%94%e3%81%bc%e3%81%86%e8%8c%b6%e3%83%86%e3%82%a3%e3%83%bc%e3%83%90%e3%83%83%e3%82%b0/", "t": [1, 1, 2, 2, 0, 0, 3, 3, 0, 0, 0, 3, 0], "b": "tb_health"}, {"n": "だったんそば茶", "c": "健康茶", "p": "864", "v": "150 g", "d": "だったんそばの実を炒りあげた、香ばしくまろやかな風味が特徴です。", "j": "4970058477399", "u": "https://kaorichan.co.jp/product/%e3%81%a0%e3%81%a3%e3%81%9f%e3%82%93%e3%81%9d%e3%81%b0%e8%8c%b6/", "t": [1, 1, 3, 2, 1, 0, 3, 0, 3, 1, 1, 3, 0], "b": "leaf_soba"}, {"n": "ドリップルイボス", "c": "健康茶", "p": "864", "v": "150g", "d": "珈琲のようにドリップで入れる、新感覚ルイボスティーです。 ・ドリップに合うよう、茶葉の粒度を調整し、深煎りに仕上げています。 ・濃厚でコクがある風味は、通常のティーバッグのルイボスティーとは全く異なる新しい味わいです。", "j": "4970058497212", "u": "https://kaorichan.co.jp/product/%e3%83%89%e3%83%aa%e3%83%83%e3%83%97%e3%83%ab%e3%82%a4%e3%83%9c%e3%82%b9/", "t": [1, 3, 3, 0, 2, 2, 3, 1, 1, 3, 0, 2, 2], "b": "drip"}, {"n": "北海道産黒豆茶24袋", "c": "健康茶", "p": "648", "v": "120 g ( 5 g × 24袋 )", "d": "焙煎度合いが異なる、2種類の北海道産黒豆をブレンドし、香ばしさとまろやかな甘みを引き出した、黒豆茶です。 カフェインゼロなので、お子様からご年配の方まで安心してお召し上がりいただけます。", "j": "4970058496581", "u": "https://kaorichan.co.jp/product/%e5%8c%97%e6%b5%b7%e9%81%93%e7%94%a3%e9%bb%92%e8%b1%86%e8%8c%b624%e8%a2%8b/", "t": [1, 0, 3, 2, 1, 1, 3, 3, 0, 1, 1, 2, 0], "b": "tb_health"}, {"n": "有機ルイボスティー 50p", "c": "健康茶", "p": "810", "v": "110g （2.2g×50袋）", "d": "南アフリカの有機JAS認証農場で育て、製茶した原料を直輸入し、国内で焙煎、三角ティーバッグに加工した、有機ルイボスティーです。", "j": "4970058496710", "u": "https://kaorichan.co.jp/product/%e6%9c%89%e6%a9%9f%e3%83%ab%e3%82%a4%e3%83%9c%e3%82%b9%e3%83%86%e3%82%a3%e3%83%bc-50p/", "t": [1, 1, 2, 3, 1, 0, 3, 3, 0, 2, 1, 3, 0], "b": "tb_rooibos"}, {"n": "緑茶入りどくだみ36ｐ", "c": "健康茶", "p": "1,080", "v": "360 g （10 g x 36 パック）", "d": "飲みやすさにこだわり、どくだみ茶をベースに緑茶、野草を合わせて14種配合したブレンド茶です。ティーバッグタイプなので簡単便利にご使用いただけます。ロングセラー商品です。", "j": "4970058693102", "u": "https://kaorichan.co.jp/product/%e7%b7%91%e8%8c%b6%e5%85%a5%e3%82%8a%e3%81%a9%e3%81%8f%e3%81%a0%e3%81%bf36%ef%bd%90/", "t": [0, 1, 1, 2, 0, 0, 0, 3, 0, 1, 1, 3, 0], "b": "tb_health"}, {"n": "香るルイボスティー アールグレイ", "c": "健康茶", "p": "540", "v": "18g (1.8 g x 10 パック)", "d": "まろやかな味わいの有機ルイボスティーを、100%使用し、ベルガモットの爽やかな香りをプラスしました。 心安らぐ香りをお楽しみいただける、フレーバールイボスティーです。 水出しもすっきりとして香りも豊かです。", "j": "4970058496468", "u": "https://kaorichan.co.jp/product/%e9%a6%99%e3%82%8b%e3%83%ab%e3%82%a4%e3%83%9c%e3%82%b9%e3%83%86%e3%82%a3%e3%83%bc-%e3%82%a2%e3%83%bc%e3%83%ab%e3%82%b0%e3%83%ac%e3%82%a4/", "t": [0, 0, 1, 3, 3, 1, 3, 3, 0, 1, 0, 1, 0], "b": "tb_rooibos"}, {"n": "香るルイボスティー ショコラパフェ", "c": "健康茶", "p": "540", "v": "18g (1.8 g x 10 パック)", "d": "まろやかな味わいの有機ルイボスティーを、100%使用し、ショコラパフェの甘い香りをプラスしました。 甘い香りのグラデーション(バニラ・ バナナ・ショコラ)をお楽しみいただける、フレーバールイボスティーです。", "j": "4970058496482", "u": "https://kaorichan.co.jp/product/%e9%a6%99%e3%82%8b%e3%83%ab%e3%82%a4%e3%83%9c%e3%82%b9%e3%83%86%e3%82%a3%e3%83%bc-%e3%82%b7%e3%83%a7%e3%82%b3%e3%83%a9%e3%83%91%e3%83%95%e3%82%a7/", "t": [0, 0, 1, 2, 3, 3, 3, 3, 0, 1, 0, 1, 0], "b": "tb_rooibos"}, {"n": "香るルイボスティー ベリーベリー", "c": "健康茶", "p": "540", "v": "18g (1.8 g x 10 パック)", "d": "まろやかな味わいの有機ルイボスティーを、100%使用し、フルーティーで華やかなベリーの香りをプラスしました。 心安らぐ香りをお楽しみいただける、フレーバールイボスティーです。 水出しもすっきりとして香りも豊かです。", "j": "4970058496475", "u": "https://kaorichan.co.jp/product/%e9%a6%99%e3%82%8b%e3%83%ab%e3%82%a4%e3%83%9c%e3%82%b9%e3%83%86%e3%82%a3%e3%83%bc-%e3%83%99%e3%83%aa%e3%83%bc%e3%83%99%e3%83%aa%e3%83%bc/", "t": [0, 0, 1, 3, 3, 2, 3, 3, 0, 1, 0, 1, 0], "b": "tb_rooibos"}, {"n": "太閤の白", "c": "抹茶", "p": "2,484", "v": "30 g", "d": "日光を遮って栽培した茶葉を粉末状にした、さわやかな旨味を楽しめるまろやかな味わいの宇治抹茶です。 苦みが少なく、お子様でも美味しくお召し上がりいただける、のど越しの良さが特徴です。", "j": "4970058470833", "u": "https://kaorichan.co.jp/product/%e5%a4%aa%e9%96%a4%e3%81%ae%e7%99%bd/", "t": [3, 1, 0, 1, 2, 1, 0, 1, 1, 3, 0, 0, 3], "b": "matcha"}, {"n": "宇治抹茶カプチーノ", "c": "抹茶", "p": "648", "v": "75 g （15 g x 5 パック）", "d": "京都府産１００％の石臼挽き抹茶を使用しています。お薄としても使用可能なかなり上質な抹茶を使っていますので、抹茶の渋味だけではなく、芳醇な旨味も存分に感じて頂けます。他とは違う贅を尽くしたカプチーノです。", "j": "4970058489026", "u": "https://kaorichan.co.jp/product/%e5%ae%87%e6%b2%bb%e6%8a%b9%e8%8c%b6%e3%82%ab%e3%83%97%e3%83%81%e3%83%bc%e3%83%8e/", "t": [2, 2, 0, 0, 2, 3, 0, 3, 0, 2, 0, 0, 0], "b": "cappuccino"}, {"n": "彩香", "c": "抹茶", "p": "1,080", "v": "30 g", "d": "日光を遮って栽培した茶葉を粉末状にした、さわやかな旨味を楽しめるまろやかな味わいの宇治抹茶です。", "j": "4970058440614", "u": "https://kaorichan.co.jp/product/%e5%bd%a9%e9%a6%99/", "t": [3, 2, 0, 1, 2, 0, 0, 1, 1, 2, 0, 0, 3], "b": "matcha"}, {"n": "御代の昔", "c": "抹茶", "p": "756", "v": "30 g", "d": "日光を遮って栽培した茶葉を粉末状にした、さわやかな旨味を楽しめるまろやかな味わいの宇治抹茶です。 お料理にもお使いいただけます。", "j": "御代の昔", "u": "https://kaorichan.co.jp/product/%e5%be%a1%e4%bb%a3%e3%81%ae%e6%98%94/", "t": [2, 2, 0, 1, 1, 0, 0, 1, 1, 1, 2, 0, 3], "b": "matcha"}, {"n": "抹茶永寿", "c": "抹茶", "p": "1,404", "v": "30 g", "d": "日光を遮って栽培した茶葉を粉末状にした、さわやかな旨味を楽しめるまろやかな味わいの宇治抹茶です。", "j": "抹茶永寿", "u": "https://kaorichan.co.jp/product/%e6%8a%b9%e8%8c%b6%e6%b0%b8%e5%af%bf/", "t": [3, 2, 0, 1, 2, 0, 0, 1, 1, 3, 0, 0, 3], "b": "matcha"}, {"n": "かりがね120g", "c": "煎茶", "p": "648", "v": "120 g", "d": "すっきりした風味と、ほのかな渋味が味わえるお茶です。", "j": "4970058497144", "u": "https://kaorichan.co.jp/product/%e3%81%8b%e3%82%8a%e3%81%8c%e3%81%ad120g/", "t": [2, 2, 0, 3, 1, 0, 0, 0, 3, 1, 1, 0, 0], "b": "leaf_sencha"}, {"n": "ききかおり煎茶ティーバッグ", "c": "煎茶", "p": "432", "v": "20g (10袋)", "d": "茶審査技術 女性最高段位の”上薗みゆき”が、若い人がお茶と出会うきっかけを作りたい！との想いで作り上げた、香り豊かなお茶のティーバッグです。 お茶本来のおいしさを持つ一番茶を使用。", "j": "ききかおり煎茶ティー", "u": "https://kaorichan.co.jp/product/%e3%81%8d%e3%81%8d%e3%81%8b%e3%81%8a%e3%82%8a%e7%85%8e%e8%8c%b6%e3%83%86%e3%82%a3%e3%83%bc%e3%83%90%e3%83%83%e3%82%b0/", "t": [2, 1, 0, 2, 3, 0, 0, 3, 0, 3, 0, 0, 0], "b": "tb_green"}, {"n": "八女煎茶120g", "c": "煎茶", "p": "918", "v": "120 g", "d": "まろやかでコクのある八女茶を味と香りにこだわり仕上げました。", "j": "4970058496895", "u": "https://kaorichan.co.jp/product/%e5%85%ab%e5%a5%b3%e7%85%8e%e8%8c%b6120g/", "t": [3, 3, 0, 1, 2, 0, 0, 0, 3, 3, 0, 0, 0], "b": "leaf_sencha"}, {"n": "十段乃茶煎茶", "c": "煎茶", "p": "1,296", "v": "100 g", "d": "茶審査鑑定技術・最高位十段 池田研太監修。池田研太氏は、全国茶審査技術競技大会において、茶審査鑑定技術十段位（最高位）を取得した「茶匠」。十段位の取得は、製茶業界の中でも至難の技と言われています。", "j": "4970058492712", "u": "https://kaorichan.co.jp/product/%e5%8d%81%e6%ae%b5%e4%b9%83%e8%8c%b6%e7%85%8e%e8%8c%b6/", "t": [3, 3, 0, 1, 3, 0, 0, 0, 3, 3, 0, 0, 0], "b": "leaf_sencha"}, {"n": "十段深蒸し茶ティーバッグ", "c": "煎茶", "p": "702", "v": "70 g ( 20袋 )", "d": "茶審査鑑定技術・最高位十段 池田研太監修の『十段乃茶』シリーズに、深蒸し茶のティーバッグが登場。簡単便利に匠のお茶を味わっていただけます。", "j": "4970058495607", "u": "https://kaorichan.co.jp/product/%e5%8d%81%e6%ae%b5%e6%b7%b1%e8%92%b8%e3%81%97%e8%8c%b6%e3%83%86%e3%82%a3%e3%83%bc%e3%83%90%e3%83%83%e3%82%b0-2/", "t": [3, 3, 0, 1, 2, 0, 0, 3, 0, 3, 0, 0, 0], "b": "tb_green_deep"}, {"n": "抹茶入り緑茶 シルキー 3g x 27p", "c": "煎茶", "p": "648", "v": "81 g （3 g x 27 パック）", "d": "抹茶入りなので、水色がよく、渋すぎず飲みやすい風味の緑茶に仕上げました。 三角パックのため、茶葉がよく広がり、抽出のよいティーバッグです。", "j": "4970058600407", "u": "https://kaorichan.co.jp/product/%e6%8a%b9%e8%8c%b6%e5%85%a5%e3%82%8a%e7%b7%91%e8%8c%b6%e3%82%b7%e3%83%ab%e3%82%ad%e3%83%bc3gx27%ef%bd%90/", "t": [2, 2, 0, 2, 1, 0, 0, 3, 0, 1, 1, 0, 0], "b": "tb_green"}, {"n": "深蒸し香り知覧茶80g", "c": "煎茶", "p": "918", "v": "80 g", "d": "南国の温暖な気候で育った鹿児島県知覧産の茶葉を、深蒸しに仕上げました。深蒸し独特のふくよかで濃厚、旨味のある水色の濃いお茶です。", "j": "4970058496802", "u": "https://kaorichan.co.jp/product/%e6%b7%b1%e8%92%b8%e3%81%97%e9%a6%99%e3%82%8a%e7%9f%a5%e8%a6%a7%e8%8c%b680g/", "t": [3, 3, 0, 0, 2, 0, 0, 0, 3, 3, 0, 0, 0], "b": "leaf_fukamushi"}, {"n": "濃いめ緑茶100g", "c": "煎茶", "p": "540", "v": "100 g", "d": "深蒸し茶をブレンドし、濃いめに仕上げた緑茶です。 濃いめがお好きな方は、少なめのお湯で濃く淹れて、あっさりがお好きな方は、多めのお湯で淹れて、お好みに合わせてお楽しみいただけます。", "j": "4970058496772", "u": "https://kaorichan.co.jp/product/%e6%bf%83%e3%81%84%e3%82%81%e7%b7%91%e8%8c%b6100g/", "t": [2, 3, 0, 1, 0, 0, 0, 0, 3, 0, 1, 0, 0], "b": "leaf_fukamushi"}, {"n": "産地の贅沢・八女茶シルキーパック 20p", "c": "煎茶", "p": "918", "v": "60g (3g x 20 パック)", "d": "創業文政2年 (1819年) 福岡県の老舗問屋 古賀製茶本舗の産地元詰め品です。 高級茶の産地として知られる福岡県八女産の茶葉を使用し、抽出性の優れた三角シルキーパックにしました。", "j": "4970058496826", "u": "https://kaorichan.co.jp/product/%e7%94%a3%e5%9c%b0%e3%81%ae%e8%b4%85%e6%b2%a2%e3%83%bb%e5%85%ab%e5%a5%b3%e8%8c%b6%e3%82%b7%e3%83%ab%e3%82%ad%e3%83%bc%e3%83%91%e3%83%83%e3%82%af-20p/", "t": [3, 2, 0, 1, 3, 0, 0, 3, 0, 3, 0, 0, 0], "b": "tb_green"}, {"n": "産地の贅沢・知覧茶シルキーパック 20p", "c": "煎茶", "p": "918", "v": "60g (3g x 20 パック)", "d": "南国特有の温暖な気候で育った知覧茶の茶葉を、抽出性の優れた三角シルキーパックに、産地元詰めしました。 簡単・便利に若緑色の水色と、爽やかな香りの産地の特色がお楽しみいただける、贅沢な味わいの逸品です。", "j": "4970058496833", "u": "https://kaorichan.co.jp/product/%e7%94%a3%e5%9c%b0%e3%81%ae%e8%b4%85%e6%b2%a2%e3%83%bb%e7%9f%a5%e8%a6%a7%e8%8c%b6%e3%82%b7%e3%83%ab%e3%82%ad%e3%83%bc%e3%83%91%e3%83%83%e3%82%af-20p/", "t": [2, 1, 0, 3, 3, 0, 0, 3, 0, 3, 0, 0, 0], "b": "tb_green"}, {"n": "緑茶ティーバッグ30P", "c": "煎茶", "p": "648", "v": "120g ( 4g x 30パック )", "d": "国産茶葉１００％使用の、ふくよかな香りと味わいのティーバッグです。水出しお湯出し兼用で、お手軽にお楽しみいただけます。", "j": "4970058497175", "u": "https://kaorichan.co.jp/product/%e7%b7%91%e8%8c%b6%e3%83%86%e3%82%a3%e3%83%bc%e3%83%90%e3%83%83%e3%82%b030p/", "t": [2, 1, 0, 2, 1, 0, 0, 3, 0, 0, 2, 0, 0], "b": "tb_green"}, {"n": "蒸し製玉緑茶100g", "c": "煎茶", "p": "540", "v": "100 g", "d": "すっきりした香りで苦渋味が少なく、茶葉が丸まっているお茶です。", "j": "4970058497311", "u": "https://kaorichan.co.jp/product/%e8%92%b8%e3%81%97%e8%a3%bd%e7%8e%89%e7%b7%91%e8%8c%b6100g/", "t": [2, 1, 0, 3, 1, 0, 0, 0, 3, 1, 1, 0, 0], "b": "leaf_sencha"}, {"n": "静岡煎茶120g", "c": "煎茶", "p": "540", "v": "120 g", "d": "深い味わいの静岡茶を、味と香りにこだわり仕上げました。", "j": "4970058496840", "u": "https://kaorichan.co.jp/product/%e9%9d%99%e5%b2%a1%e7%85%8e%e8%8c%b6120g/", "t": [2, 3, 0, 1, 1, 0, 0, 0, 3, 2, 1, 0, 0], "b": "leaf_sencha"}, {"n": "抹茶入り玄米シルキー22ｐ", "c": "玄米茶", "p": "540", "v": "110 g （5 g x 22 パック）", "d": "抹茶入り玄米茶は、国産茶葉を100%使用し、まろやかな抹茶の風味と玄米茶の香ばしい味わいが楽しめるお茶です。 茶葉がよく広がり、たっぷりと美味しさが抽出される、三角タイプのティーバッグです。", "j": "4970058657104", "u": "https://kaorichan.co.jp/product/%e6%8a%b9%e8%8c%b6%e5%85%a5%e3%82%8a%e7%8e%84%e7%b1%b3%e3%82%b7%e3%83%ab%e3%82%ad%e3%83%bc22%ef%bd%90/", "t": [2, 1, 3, 1, 1, 0, 0, 3, 0, 1, 2, 0, 0], "b": "tb_genmai"}, {"n": "抹茶入玄米茶150g", "c": "玄米茶", "p": "540", "v": "150 g", "d": "抹茶のまろやかな風味ときれいな色、玄米の香ばしさが楽しめる、日常におすすめの抹茶入玄米茶です。", "j": "4970058497229", "u": "https://kaorichan.co.jp/product/%e6%8a%b9%e8%8c%b6%e5%85%a5%e7%8e%84%e7%b1%b3%e8%8c%b6150g/", "t": [2, 1, 3, 1, 1, 0, 0, 0, 3, 0, 3, 0, 0], "b": "leaf_genmai"}, {"n": "抹茶入玄米茶ティーバッグ30P", "c": "玄米茶", "p": "648", "v": "120g ( 4g x 30パック )", "d": "ロングセラー商品のかおりちゃん抹茶入玄米茶ティーバッグは、香ばしい香りの中に適度な渋みもあり、お食事にもおすすめです。", "j": "4970058497199", "u": "https://kaorichan.co.jp/product/%e6%8a%b9%e8%8c%b6%e5%85%a5%e7%8e%84%e7%b1%b3%e8%8c%b6%e3%83%86%e3%82%a3%e3%83%bc%e3%83%90%e3%83%83%e3%82%b030p/", "t": [1, 2, 3, 1, 1, 0, 0, 3, 0, 0, 3, 0, 0], "b": "tb_genmai"}, {"n": "玉露入り玄米茶150g", "c": "玄米茶", "p": "648", "v": "150 g", "d": "玉露入り茶葉の深いコク、ふっくら香ばしい玄米をブレンドしました。ひと味違う“うまい”玄米茶をご賞味ください。", "j": "4970058497069", "u": "https://kaorichan.co.jp/product/%e7%8e%89%e9%9c%b2%e5%85%a5%e3%82%8a%e7%8e%84%e7%b1%b3%e8%8c%b6150g/", "t": [3, 2, 3, 0, 1, 0, 0, 0, 3, 2, 2, 0, 0], "b": "leaf_genmai"}, {"n": "粉末玄米茶", "c": "玄米茶", "p": "702", "v": "70 g", "d": "香ばしい玄米茶を、そのまま粉末にしました。 粉末なのでお茶の栄養をまるごと摂取できます。 玄米の香ばしさとまろやかな風味が特徴です。 回転すし屋さんの“あがり一丁”をお楽しみください。", "j": "4970058495089", "u": "https://kaorichan.co.jp/product/%e7%b2%89%e6%9c%ab%e7%8e%84%e7%b1%b3%e8%8c%b6/", "t": [1, 1, 3, 1, 0, 0, 0, 3, 0, 0, 3, 1, 0], "b": "powder"}, {"n": "Tグリーンティー120g", "c": "粉末茶", "p": "540", "v": "120 g", "d": "国産抹茶を使用した、まろやかな抹茶の味わいが楽しめる優しい甘みのグリーンティーです。冷水やお湯、牛乳で溶いてお召し上がりいただけます。", "j": "4970058497533", "u": "https://kaorichan.co.jp/product/t%e3%82%b0%e3%83%aa%e3%83%bc%e3%83%b3%e3%83%86%e3%82%a3%e3%83%bc120g/", "t": [2, 1, 0, 1, 1, 3, 0, 3, 0, 0, 0, 0, 0], "b": "powder"}, {"n": "昆布茶 紙缶入り", "c": "粉末茶", "p": "378", "v": "50g（25 g × 2 袋）", "d": "厳寒な海にはぐくまれた、国産昆布を独自製法で粉末化し、昆布の風味を贅沢に生かしました。 昆布茶だけでなく、お料理の隠し味や、お出汁にもご利用いただけます。", "j": "4970058496994", "u": "https://kaorichan.co.jp/product/%e6%98%86%e5%b8%83%e8%8c%b6-%e7%b4%99%e7%bc%b6%e5%85%a5%e3%82%8a/", "t": [3, 1, 0, 1, 0, 0, 3, 3, 0, 0, 3, 1, 0], "b": "powder"}, {"n": "梅昆布茶 紙缶入り", "c": "粉末茶", "p": "378", "v": "40g（20g×2袋）", "d": "厳寒な海にはぐくまれた、国産昆布と、国産梅を使用し、梅の酸味と昆布の風味を贅沢に生かしました。 国産のしそ葉も入り、お茶漬けやふりかけにも重宝します。", "j": "4970058497007", "u": "https://kaorichan.co.jp/product/%e6%a2%85%e6%98%86%e5%b8%83%e8%8c%b6-%e7%b4%99%e7%bc%b6%e5%85%a5%e3%82%8a/", "t": [2, 1, 0, 2, 1, 0, 3, 3, 0, 0, 3, 1, 0], "b": "powder"}, {"n": "粉末緑茶100ｐ", "c": "粉末茶", "p": "3,564", "v": "150g (1.5g x 100 パック)", "d": "コップに入れてお湯や水を注ぐだけで、手軽にお楽しみいただけます。緑茶本来の恵みの栄養分と繊維を丸ごと摂取できますので、健康維持にお役立てください。", "j": "4970058440621", "u": "https://kaorichan.co.jp/product/%e7%b2%89%e6%9c%ab%e7%b7%91%e8%8c%b6100%ef%bd%90/", "t": [2, 2, 0, 1, 0, 0, 0, 3, 0, 1, 1, 3, 0], "b": "powder"}, {"n": "緑茶青汁 30袋入り", "c": "青汁", "p": "1,836", "v": "90g （ ３g × 30パック )", "d": "特別栽培した粉末緑茶と、くせの少ない風味まろやかな大麦若葉を5:5でブレンドしました。緑茶の成分と、新鮮な若葉を原料とする大麦若葉の健康素材を毎日の生活にお役立てください。食品添加物不使用。 ※通販部専用商品", "j": "4970058479379", "u": "https://kaorichan.co.jp/product/%e7%b7%91%e8%8c%b6%e9%9d%92%e6%b1%81-30%e8%a2%8b%e5%85%a5%e3%82%8a/", "t": [1, 1, 0, 2, 0, 0, 0, 3, 0, 1, 0, 3, 0], "b": "aojiru"}, {"n": "黒豆入り緑茶青汁 30袋入り", "c": "青汁", "p": "2,160", "v": "90g ( 3g x 30パック )", "d": "特別栽培茶を使用した粉末緑茶と、くせの少ない風味の大麦若葉に香ばしい黒豆を使用し、まろやかに仕上げた青汁です。食品添加物不使用。 ※通販部専用商品", "j": "4970058488845", "u": "https://kaorichan.co.jp/product/%e9%bb%92%e8%b1%86%e5%85%a5%e3%82%8a%e7%b7%91%e8%8c%b6%e9%9d%92%e6%b1%81-30%e8%a2%8b%e5%85%a5%e3%82%8a/", "t": [1, 1, 2, 1, 0, 1, 0, 3, 0, 1, 0, 3, 0], "b": "aojiru"}, {"n": "かおりちゃん黒烏龍茶40ｐ", "c": "麦茶・烏龍茶", "p": "648", "v": "200 g （5 g x 40 パック）", "d": "一般的な烏龍茶に比べ深く発酵し、じっくりと焙煎して仕上げた烏龍茶です。 肉料理や脂っこい料理がお好きな方に、食事の脂肪吸収を抑えるウーロン重合ポリフェノールを含んだ黒烏龍茶が特にお奨めです。", "j": "4970058483543", "u": "https://kaorichan.co.jp/product/%e3%81%8b%e3%81%8a%e3%82%8a%e3%81%a1%e3%82%83%e3%82%93%e9%bb%92%e7%83%8f%e9%be%8d%e8%8c%b640%ef%bd%90/", "t": [0, 2, 3, 2, 1, 0, 0, 3, 0, 1, 3, 3, 0], "b": "tb_oolong"}, {"n": "はと麦入り麦茶28ｐ", "c": "麦茶・烏龍茶", "p": "378", "v": "280 g （10 g x 28 パック）", "d": "無添加、無着色の原料を使い、穀物の持つおいしさをブレンドした商品です。 水出しも簡単便利ですが、煮出していただくと、より一層おいしくお召し上がりいただけます。", "j": "4970058484977", "u": "https://kaorichan.co.jp/product/%e3%81%af%e3%81%a8%e9%ba%a6%e5%85%a5%e3%82%8a%e9%ba%a6%e8%8c%b628%ef%bd%90/", "t": [0, 0, 3, 3, 0, 0, 3, 3, 0, 0, 3, 1, 0], "b": "mugi"}, {"n": "ウーロン茶50ｐ", "c": "麦茶・烏龍茶", "p": "648", "v": "250 g （5 g x 50 パック）", "d": "烏龍茶の本場、中国福健省産の烏龍茶原料を使用して、当社独自のテイスティング技術を生かし、のど越しが良く、爽やかな香りに仕上げました。温冷両用のお得で、使いやすい烏龍茶ティーパックです。", "j": "4970058474329", "u": "https://kaorichan.co.jp/product/%e3%82%a6%e3%83%bc%e3%83%ad%e3%83%b3%e8%8c%b650%ef%bd%90/", "t": [0, 1, 1, 3, 2, 0, 0, 3, 0, 0, 3, 0, 0], "b": "tb_oolong"}, {"n": "本仕込み麦茶ティーパック", "c": "麦茶・烏龍茶", "p": "540", "v": "420 g （15 g x 28 パック）", "d": "粒ぞろいの大麦を丁寧に磨きあげ、丸つぶのまま水に浸し、丸つぶのままさらに蒸す。ごはんの様にふっくらしたら乾燥させ、「芯まで釜で焙煎」。ひと手間かけた「本仕込み！」。丸つぶ麦の懐かしい香りをお楽しみください。ロングセラー商品です。", "j": "4970058491487", "u": "https://kaorichan.co.jp/product/%e6%9c%ac%e4%bb%95%e8%be%bc%e3%81%bf%e9%ba%a6%e8%8c%b6%e3%83%86%e3%82%a3%e3%83%bc%e3%83%91%e3%83%83%e3%82%af/", "t": [0, 1, 3, 3, 1, 0, 3, 3, 0, 1, 3, 0, 0], "b": "mugi"}, {"n": "黒豆入り麦茶40袋", "c": "麦茶・烏龍茶", "p": "540", "v": "340g (40袋)", "d": "国産100％の黒豆を、国産麦茶にブレンドし、香ばしくまろやかな風味に仕上げました。 素材の味を大切にしていますので、お子様からご年配の方まで安心してお召し上がりいただけます。憩いのひとときにぜひご愛飲ください。", "j": "4970058496604", "u": "https://kaorichan.co.jp/product/%e9%bb%92%e8%b1%86%e5%85%a5%e3%82%8a%e9%ba%a6%e8%8c%b640%e8%a2%8b/", "t": [1, 0, 3, 2, 1, 1, 3, 3, 0, 0, 3, 1, 0], "b": "mugi"}];
+var BREW={"leaf_sencha": {"temp": "80℃", "leaf": "3g", "time": "60秒", "sec": 60, "notes": [["二煎目", "85℃で20秒。一煎目より短く切ります。"], ["合わせて", "和菓子、干菓子。甘いものと。"], ["向く場面", "一人の時間、来客のとき。"]], "voice": "最後の一滴に、いちばん濃い味が残っています。注ぎきってこそ、二煎目もおいしくなります。", "steps": [{"l": "一煎目", "t": "80℃", "a": "茶葉 3g", "s": 60}, {"l": "二煎目", "t": "85℃", "a": "そのまま", "s": 20}]}, "leaf_fukamushi": {"temp": "80℃", "leaf": "3g", "time": "30秒", "sec": 30, "notes": [["二煎目", "90℃で10秒。深蒸しは短く。"], ["合わせて", "甘い和菓子、チョコレート。"], ["冷茶に", "熱湯で濃く淹れ、氷に注ぎ分けます。"]], "voice": "深蒸しは茶葉が細かいので、置きすぎると濁って渋くなります。三十秒で注ぎきってください。", "steps": [{"l": "一煎目", "t": "80℃", "a": "茶葉 3g", "s": 30}, {"l": "二煎目", "t": "90℃", "a": "そのまま", "s": 10}]}, "leaf_hojicha": {"temp": "熱湯", "leaf": "3g", "time": "30秒", "sec": 30, "notes": [["二煎目", "熱湯で15秒。香りはまだ残っています。"], ["合わせて", "焼き菓子、揚げ物、お茶漬け。"], ["向く場面", "夜、食後のひと息。"]], "voice": "ほうじ茶だけは、熱い湯をためらわずに。香りは高い温度でしか立ちません。", "steps": [{"l": "一煎目", "t": "熱湯", "a": "茶葉 3g", "s": 30}, {"l": "二煎目", "t": "熱湯", "a": "そのまま", "s": 15}]}, "leaf_genmai": {"temp": "熱湯", "leaf": "3g", "time": "30秒", "sec": 30, "notes": [["二煎目", "熱湯で15秒。玄米の香りが続きます。"], ["合わせて", "おにぎり、漬物、和食全般。"], ["向く場面", "食事中、家族みんなで。"]], "voice": "玄米茶は長く置くと米の香りが重くなります。三十秒で切ると、後味が軽く仕上がります。", "steps": [{"l": "一煎目", "t": "熱湯", "a": "茶葉 3g", "s": 30}, {"l": "二煎目", "t": "熱湯", "a": "そのまま", "s": 15}]}, "leaf_soba": {"temp": "熱湯", "leaf": "大さじ1", "time": "3分", "sec": 180, "notes": [["二煎目", "熱湯で2分。実は食べられます。"], ["合わせて", "食事全般。カフェインゼロ。"], ["向く場面", "夜、家族みんなで。"]], "voice": "そばの実は湯に浮きます。蓋をして三分、じっくり沈むのを待ってください。", "steps": [{"l": "一煎目", "t": "熱湯", "a": "大さじ1", "s": 180}, {"l": "二煎目", "t": "熱湯", "a": "そのまま", "s": 120}]}, "tb_green": {"temp": "熱湯", "leaf": "1袋", "time": "60秒", "sec": 60, "notes": [["ゆらす", "最後に袋を数回ゆらしてから引き上げます。"], ["二煎目", "熱湯で30秒。もう一杯いけます。"], ["水出しも", "ボトルに1袋と水で、冷蔵庫に2時間。"]], "voice": "ティーバッグを何度も押しつぶすと渋みだけが出ます。ゆらして、静かに引き上げてください。", "steps": [{"l": "一煎目", "t": "熱湯", "a": "1袋", "s": 60}, {"l": "二煎目", "t": "熱湯", "a": "そのまま", "s": 30}, {"l": "水出し", "t": "冷水", "a": "1袋 / 500ml", "s": 7200}]}, "tb_green_deep": {"temp": "熱湯", "leaf": "1袋", "time": "40秒", "sec": 40, "notes": [["ゆらす", "最後に袋を数回ゆらしてから引き上げます。"], ["二煎目", "熱湯で20秒。"], ["合わせて", "甘いお菓子と。"]], "voice": "深蒸しは早く濃く出ます。色がついたら、待たずに引き上げてください。", "steps": [{"l": "一煎目", "t": "熱湯", "a": "1袋", "s": 40}, {"l": "二煎目", "t": "熱湯", "a": "そのまま", "s": 20}]}, "tb_hojicha": {"temp": "熱湯", "leaf": "1袋", "time": "30秒", "sec": 30, "notes": [["二煎目", "熱湯で20秒。"], ["合わせて", "焼き菓子、揚げ物、食後に。"], ["向く場面", "夜でも。カフェインは控えめです。"]], "voice": "熱湯を高い位置から注ぐと、香りが一気に立ちます。ほうじ茶は香りが命です。", "steps": [{"l": "一煎目", "t": "熱湯", "a": "1袋", "s": 30}, {"l": "二煎目", "t": "熱湯", "a": "そのまま", "s": 20}]}, "tb_genmai": {"temp": "熱湯", "leaf": "1袋", "time": "40秒", "sec": 40, "notes": [["二煎目", "熱湯で20秒。"], ["合わせて", "おにぎり、漬物、和食全般。"], ["向く場面", "食事中に。"]], "voice": "玄米茶は食事の味を消しません。濃く出そうとせず、四十秒で軽やかに。", "steps": [{"l": "一煎目", "t": "熱湯", "a": "1袋", "s": 40}, {"l": "二煎目", "t": "熱湯", "a": "そのまま", "s": 20}]}, "tb_oolong": {"temp": "熱湯", "leaf": "1袋", "time": "60秒", "sec": 60, "notes": [["二煎目", "熱湯で40秒。"], ["合わせて", "肉料理、脂ののった料理、中華。"], ["冷たくも", "水出しでもすっきり飲めます。"]], "voice": "烏龍茶は食事と一緒に。脂を流してくれるので、こってりした料理の日に。", "steps": [{"l": "一煎目", "t": "熱湯", "a": "1袋", "s": 60}, {"l": "二煎目", "t": "熱湯", "a": "そのまま", "s": 40}, {"l": "水出し", "t": "冷水", "a": "1袋 / 500ml", "s": 7200}]}, "tb_flavor": {"temp": "熱湯", "leaf": "1袋", "time": "3分", "sec": 180, "notes": [["蓋をする", "香りが逃げないよう、蓋かソーサーを。"], ["合わせて", "焼き菓子、パン、洋菓子。"], ["向く場面", "午後、気分を変えたいとき。"]], "voice": "香りのお茶は、蓋をして蒸らしてください。開けた瞬間の立ち香が、いちばんのごちそうです。", "steps": [{"l": "お湯出し", "t": "熱湯", "a": "1袋", "s": 180}]}, "tb_jasmine": {"temp": "熱湯", "leaf": "1袋", "time": "90秒", "sec": 90, "notes": [["二煎目", "熱湯で60秒。香りは続きます。"], ["合わせて", "中華、点心、脂のある料理。"], ["向く場面", "食後、口をさっぱりさせたいとき。"]], "voice": "ジャスミンは長く置くと苦味が出ます。九十秒で、香りだけを取り出してください。", "steps": [{"l": "一煎目", "t": "熱湯", "a": "1袋", "s": 90}, {"l": "二煎目", "t": "熱湯", "a": "そのまま", "s": 60}]}, "tb_rooibos": {"temp": "熱湯", "leaf": "1袋", "time": "3分", "sec": 180, "notes": [["水出しも", "ボトルに1袋と水で、冷蔵庫に3時間。"], ["ミルクでも", "少し濃いめに出して牛乳を。"], ["向く場面", "夜、就寝前。ノンカフェインです。"]], "voice": "ルイボスは煮出しても渋くなりません。濃さが足りなければ、遠慮なく待ってください。", "steps": [{"l": "お湯出し", "t": "熱湯", "a": "1袋", "s": 180}, {"l": "水出し", "t": "冷水", "a": "1袋 / 500ml", "s": 10800}]}, "tb_health": {"temp": "熱湯", "leaf": "1袋", "time": "3分", "sec": 180, "notes": [["水出しも", "冷蔵庫で一晩。まろやかになります。"], ["やかんで", "1Lの湯で5分煮出すと濃く出ます。"], ["向く場面", "毎日の水分補給に。"]], "voice": "毎日飲むお茶は、濃さより続けやすさです。薄いと感じたら袋を増やすより、時間を延ばしてください。", "steps": [{"l": "お湯出し", "t": "熱湯", "a": "1袋", "s": 180}, {"l": "煮出し", "t": "火にかける", "a": "1袋 / 1L", "s": 300}]}, "mugi": {"temp": "煮出し", "leaf": "1袋/1L", "time": "5分", "sec": 300, "notes": [["水出しも", "ボトルに1袋と水1Lで、冷蔵庫に2時間。"], ["日持ち", "作った日のうちに。袋は取り出します。"], ["向く場面", "家族みんなで、一日中。"]], "voice": "麦茶は煮出したほうが香ばしさが立ちます。急がない日は、火にかけてみてください。", "steps": [{"l": "煮出し", "t": "火にかける", "a": "1袋 / 1L", "s": 300}, {"l": "水出し", "t": "冷水", "a": "1袋 / 1L", "s": 7200}]}, "powder": {"temp": "お湯/水", "leaf": "1杯分", "time": "溶かすだけ", "sec": 0, "notes": [["淹れ方", "湯呑みに入れ、湯か水を注いで混ぜます。"], ["まるごと", "茶葉ごと飲むので、栄養も繊維も摂れます。"], ["向く場面", "急須を出せない日、食事中に。"]], "voice": "粉末はダマになりやすいので、少量の湯で先に溶いてから注ぎ足してください。", "steps": [{"l": "溶かす", "t": "お湯 / 水", "a": "1杯分", "s": 0}]}, "cappuccino": {"temp": "熱湯140ml", "leaf": "1本", "time": "注ぐだけ", "sec": 0, "notes": [["淹れ方", "カップに1本入れ、熱湯を注いで混ぜます。"], ["泡立つ", "特殊ミルクが自然発泡します。混ぜすぎ不要。"], ["向く場面", "おやつの時間、来客のとき。"]], "voice": "湯は熱いほど泡が立ちます。沸かしたてを、勢いよく注いでください。", "steps": [{"l": "注ぐ", "t": "熱湯 140ml", "a": "1本", "s": 0}]}, "matcha": {"temp": "80℃", "leaf": "2g", "time": "茶筅で点てる", "sec": 0, "notes": [["淹れ方", "茶碗に茶こしで振るい、湯70mlでM字に点てます。"], ["料理にも", "菓子作りや料理の色づけにも使えます。"], ["保存", "開封後は冷蔵庫へ。香りが飛びます。"]], "voice": "抹茶はダマが命取りです。点てる前に必ず茶こしで振るってください。それだけで舌触りが変わります。", "steps": [{"l": "点てる", "t": "80℃ 70ml", "a": "2g", "s": 0}]}, "drip": {"temp": "90℃", "leaf": "10g", "time": "ドリップ", "sec": 0, "notes": [["淹れ方", "珈琲と同じ要領で、蒸らしてから注ぎます。"], ["ラテにも", "濃いめに落として牛乳を加えます。"], ["向く場面", "夜、珈琲の代わりに。ノンカフェインです。"]], "voice": "珈琲と同じで、最初の三十秒の蒸らしが効きます。粉全体を湿らせてから、本注ぎへ。", "steps": [{"l": "蒸らし", "t": "90℃", "a": "10g", "s": 30}, {"l": "抽出", "t": "90℃", "a": "そのまま", "s": 120}]}, "aojiru": {"temp": "水/牛乳", "leaf": "1本", "time": "溶かすだけ", "sec": 0, "notes": [["淹れ方", "100mlの水か牛乳に溶かします。"], ["食品添加物不使用", "粉末緑茶と大麦若葉だけです。"], ["向く場面", "朝、習慣として。"]], "voice": "青汁は冷たい水のほうが粉が沈みません。よく振ってから、すぐに飲んでください。", "steps": [{"l": "溶かす", "t": "水 / 牛乳 100ml", "a": "1本", "s": 0}]}};
+var Q=[{"t": "お茶を飲むのは、<br>どんな時間ですか。", "o": [{"l": "食事と一緒に", "w": {"meal": 3, "kobashi": 1, "sukkiri": 1}}, {"l": "仕事や作業の合間に", "w": {"quick": 2, "koku": 1, "sukkiri": 1}}, {"l": "ほっとひと息つくとき", "w": {"kaori": 2, "umami": 1, "honkaku": 1}}, {"l": "夜、一日の終わりに", "w": {"noncaf": 3, "kobashi": 1}}]}, {"t": "ふだん、<br>いちばんよく飲むものは。", "o": [{"l": "コーヒー", "w": {"koku": 2, "kobashi": 2, "dessert": 1}}, {"l": "紅茶やフレーバーティー", "w": {"kaori": 3, "dessert": 1}}, {"l": "水や麦茶", "w": {"sukkiri": 3, "noncaf": 2}}, {"l": "緑茶", "w": {"umami": 2, "koku": 1, "honkaku": 1}}]}, {"t": "味の濃さは、<br>どのくらいがお好みですか。", "o": [{"l": "しっかり濃いほうがいい", "w": {"koku": 3, "umami": 1}}, {"l": "ほどよく", "w": {"umami": 1, "sukkiri": 1}}, {"l": "すっきり軽いほうがいい", "w": {"sukkiri": 3}}]}, {"t": "渋みは、<br>どう感じますか。", "o": [{"l": "渋みも味のうち", "s": "きりっとした後口が好き", "w": {"koku": 3}}, {"l": "少しなら心地いい", "w": {"koku": 1, "umami": 1}}, {"l": "苦手。まろやかがいい", "w": {"umami": 3, "dessert": 1, "sukkiri": 1}}]}, {"t": "惹かれるのは、<br>どんな香りですか。", "o": [{"l": "青々しい、若葉の香り", "w": {"umami": 2, "kaori": 2}}, {"l": "香ばしい、炒った香り", "w": {"kobashi": 3}}, {"l": "花や果物の、甘い香り", "w": {"kaori": 3, "dessert": 2}}, {"l": "香りより、味の濃さ", "w": {"koku": 3, "umami": 1}}]}, {"t": "お茶は、<br>どうやって淹れますか。", "o": [{"l": "急須や茶筅で、道具を出して", "w": {"leaf": 3, "temae": 2, "honkaku": 1}}, {"l": "ティーバッグで", "w": {"quick": 3}}, {"l": "粉やスティックで手軽に", "w": {"quick": 3, "dessert": 1}}, {"l": "ボトルに入れて水出し", "w": {"sukkiri": 2, "quick": 2, "noncaf": 1}}]}, {"t": "カフェインは、<br>気にされますか。", "o": [{"l": "気にしない", "w": {"umami": 1, "koku": 1}}, {"l": "夕方以降は控えたい", "w": {"noncaf": 2, "kobashi": 1}}, {"l": "なるべく少ないほうがいい", "w": {"noncaf": 3}}, {"l": "子どもや家族も飲む", "w": {"noncaf": 3, "sukkiri": 1, "meal": 1}}]}, {"t": "お茶に、<br>何を求めますか。", "o": [{"l": "目を覚まし、集中したい", "w": {"koku": 2, "umami": 1}}, {"l": "ゆるめたい、落ち着きたい", "w": {"kaori": 2, "noncaf": 1, "kobashi": 1}}, {"l": "食事をおいしくしたい", "w": {"meal": 3}}, {"l": "健康。毎日の習慣にしたい", "w": {"health": 3, "quick": 1}}]}, {"t": "飲むときの温度は。", "o": [{"l": "熱々がいい", "w": {"kobashi": 2, "meal": 1}}, {"l": "ぬるめで、じっくり", "w": {"umami": 3, "honkaku": 1, "temae": 1}}, {"l": "冷たいのがいい", "w": {"sukkiri": 3, "noncaf": 1}}]}, {"t": "一杯にかける値段は。", "o": [{"l": "毎日の値段で十分", "s": "500〜650円くらい", "w": {"honkaku": -2}}, {"l": "少しいいものを", "s": "900〜1,300円くらい", "w": {"honkaku": 2}}, {"l": "贈り物にもなる特別なもの", "w": {"honkaku": 3, "kaori": 1, "umami": 1}}]}];
+
+/* ═══ 状態 ═══ */
+var params=new URLSearchParams(location.search);
+var LOT=params.get("t")||"";
+var prod=null, brewData=null, stepIdx=0;
+var endAt=0, remain=0, running=false, tick=null, wake=null, audio=null;
+var CIRC=2*Math.PI*122;
+function $(id){return document.getElementById(id)}
+function show(id){["s-pick","s-timer"].forEach(function(s){$(s).classList.remove("on")});
+  $(id).classList.add("on");window.scrollTo(0,0)}
+
+/* ═══ 商品選択 ═══ */
+function renderList(){
+  var q=($("q").value||"").trim();
+  var list=PRODUCTS.filter(function(p){return !q||p.n.indexOf(q)>=0||p.c.indexOf(q)>=0});
+  var html="",cat="";
+  list.forEach(function(p){
+    if(p.c!==cat){cat=p.c;html+='<div class="pcat">'+cat+'</div>'}
+    html+='<button class="pitem" onclick="open_(\''+p.j+'\')">'+p.n+
+          '<small>'+p.v+'　'+p.p+'円（税込）</small></button>';
+  });
+  $("plist").innerHTML=html||'<div class="pcat">見つかりません</div>';
+}
+function toPick(){stop();document.body.classList.remove("done");show("s-pick");renderList()}
+
+/* ═══ タイマー ═══
+   経過は「終了時刻」で持つ。画面を消しても、別のアプリに移っても、
+   戻ったときに正しい残り時間になる（1秒ずつ引く方式だとここでずれる）。 */
+function open_(jan){
+  prod=PRODUCTS.filter(function(p){return p.j===jan})[0]||PRODUCTS[0];
+  brewData=BREW[prod.b]; stepIdx=0;
+  $("t-cat").textContent=prod.c;
+  $("t-name").textContent=prod.n;
+  $("t-voice").textContent="「"+brewData.voice+"」";
+  $("t-foot").innerHTML="診断コード "+prod.j+(LOT?"<br>QR "+LOT:"");
+  $("d-diag").href="shindan.html"+(LOT?"?t="+encodeURIComponent(LOT):"");
+  renderSteps(); selectStep(0); show("s-timer");
+  try{history.replaceState(null,"","?p="+jan+(LOT?"&t="+encodeURIComponent(LOT):""))}catch(e){}
+}
+function renderSteps(){
+  $("t-steps").innerHTML=brewData.steps.map(function(s,i){
+    return '<button class="step'+(i===stepIdx?' on':'')+'" onclick="selectStep('+i+')">'+s.l+'</button>';
+  }).join("");
+}
+function selectStep(i){
+  stop(); document.body.classList.remove("done");
+  stepIdx=i; renderSteps();
+  var s=brewData.steps[i];
+  $("t-temp").textContent=s.t; $("t-amt").textContent=s.a;
+  remain=s.s; endAt=0;
+  $("ring").setAttribute("stroke-dasharray",CIRC);
+  $("ring").setAttribute("stroke-dashoffset",0);
+  paint();
+  if(!s.s){ // 手順だけの商品（粉末・抹茶・カプチーノ）
+    $("t-val").textContent="—";
+    $("t-sub").textContent=({"溶かす":"注いで、よく混ぜます","注ぐ":"熱湯を勢いよく注ぎます","点てる":"茶こしで振るってから"})[s.l]||"手順のとおりに";
+    $("t-ctrl").style.display="none";
+  }else{
+    $("t-ctrl").style.display="flex";
+    $("t-go").textContent="はじめる";
+    $("t-sub").textContent=long_(s.s)?"冷蔵庫に入れて、待ちます":"湯を注いだら、はじめる";
+  }
+}
+function long_(sec){return sec>=900}          // 15分以上は「飲みごろ時刻」で見せる
+function fmt(sec){
+  sec=Math.max(0,Math.round(sec));
+  var h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;
+  return h? h+":"+("0"+m).slice(-2)+":"+("0"+s).slice(-2) : m+":"+("0"+s).slice(-2);
+}
+function paint(){
+  var tot=brewData.steps[stepIdx].s;
+  $("t-val").textContent=tot?fmt(remain):"—";
+  $("ring").setAttribute("stroke-dashoffset",tot?CIRC*(1-remain/tot):0);
+}
+function toggle(){
+  if(running){ // 一時停止
+    remain=(endAt-Date.now())/1000; stop(); $("t-go").textContent="つづける";
+    $("t-sub").textContent="止めています"; return;
+  }
+  if(remain<=0) remain=brewData.steps[stepIdx].s;
+  unlockAudio(); keepAwake();
+  endAt=Date.now()+remain*1000; running=true;
+  $("t-go").textContent="とめる";
+  var s=brewData.steps[stepIdx];
+  $("t-sub").textContent=long_(s.s)
+    ? "飲みごろ "+new Date(endAt).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})+" ごろ"
+    : "抽出中";
+  tick=setInterval(update,200); update();
+}
+function update(){
+  remain=(endAt-Date.now())/1000;
+  if(remain<=0){remain=0;paint();finish();return}
+  paint();
+}
+function stop(){clearInterval(tick);tick=null;running=false;releaseWake()}
+function reset(){stop();document.body.classList.remove("done");selectStep(stepIdx)}
+function finish(){
+  stop(); document.body.classList.add("done");
+  $("t-val").textContent="どうぞ";
+  $("t-sub").textContent=brewData.steps[stepIdx].l+"、できあがりです";
+  $("t-go").textContent="もう一度";
+  chime(); if(navigator.vibrate) navigator.vibrate([140,90,140,90,240]);
+}
+
+/* 画面を消させない（対応端末のみ・失敗しても動作に影響なし） */
+function keepAwake(){ try{ if("wakeLock" in navigator)
+  navigator.wakeLock.request("screen").then(function(w){wake=w}).catch(function(){}); }catch(e){} }
+function releaseWake(){ try{ if(wake){wake.release();wake=null} }catch(e){} }
+document.addEventListener("visibilitychange",function(){
+  if(document.visibilityState==="visible"){ if(running){update();keepAwake()} }
+});
+
+/* 完了音（音源ファイルを持たず、その場で鳴らす） */
+function unlockAudio(){ try{ if(!audio){var C=window.AudioContext||window.webkitAudioContext;
+  if(C){audio=new C()}} if(audio&&audio.state==="suspended")audio.resume(); }catch(e){} }
+function chime(){ try{ if(!audio)return;
+  [0,0.42,0.84].forEach(function(t,i){
+    var o=audio.createOscillator(),g=audio.createGain(),s=audio.currentTime+t;
+    o.type="sine"; o.frequency.setValueAtTime(i===2?1046.5:783.99,s);
+    g.gain.setValueAtTime(0.0001,s);
+    g.gain.exponentialRampToValueAtTime(0.28,s+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,s+0.36);
+    o.connect(g);g.connect(audio.destination);o.start(s);o.stop(s+0.4);
+  }); }catch(e){} }
+
+function line(){
+  alert("LINE公式アカウントの友だち追加へ遷移します。\n（QR "+(LOT||"未指定")+" / 商品 "+prod.n+" を引き継ぎます）");
+  return false;
+}
+
+/* ═══ 起動 ═══
+   QRの ?t=（ロット）や ?p=（JAN）があれば、その商品のタイマーを直接ひらく */
+(function(){
+  var jan=params.get("p");
+  if(!jan&&LOT){ // ロットコードの先頭1文字＝商品コード。実運用では対応表に置き換える
+    var m=PRODUCTS.filter(function(p){return p.j.slice(-4)===LOT.slice(-4)})[0];
+    if(m) jan=m.j;
+  }
+  if(jan&&PRODUCTS.some(function(p){return p.j===jan})){ open_(jan); }
+  else { renderList(); }
+  window.__teaTimer={lot:LOT};
+})();
+</script>
+</body>
+</html>
